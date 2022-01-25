@@ -23,8 +23,8 @@ class FuncionController extends Controller{
     }
 
     public function comando(Request $request){
-    	$comando = $request->input('comando'); Artisan::call($comando);
-    	return 'comando ´'.$comando.'´ ejecutado exitosamente';
+    	$comando = $request->input('comando');  Artisan::call($comando);
+    	// return 'comando ´'.$comando.'´ ejecutado exitosamente';
     }
 
     public function registro(Request $request){

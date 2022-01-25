@@ -1,0 +1,45 @@
+=========== INFORMACION FTP SERVIDOR BEX ===============
+SERVIDOR: 15
+CARPETA: integracion-mondelez
+
+=========== INFORMACION PARAMETROS PARA CONSULTA EN SISESA =========
+CRITERIO REAL: 46
+CRITERIO PRUEBA: 41
+ID PLAN: 2
+DESDE ITEM ID: 18000
+HASTA ITEM ID: 19999
+
+========== LISTA DE PLANOS CREADOS ===============
+PLANO CLIENTES FACTURAS
+PLANO CABECERA FACTURAS
+PLANO DETALLE MOVIMIENTO FACTURAS
+PLANO RUTEROS FACTURAS
+
+========== FTP SERVIDOR MDLZ - PANDAPAN COMPARTIDO PARA SUBIR PLANOS ================
+HOST: www.atrespaldo.com
+USER: pandapan
+PASS: pruebasPandapan2021$
+
+========== COMANDOS PHP ARTISAN =====================================================
+php artisan integracion:verificar-tablas
+php artisan integracion:guardar-informacion
+php artisan integracion:generar-planos
+php artisan integracion:enviar-planos
+
+========== COMANDOS LINUX CRONTAB ===================================================
+###------------------[    VERIFICAR, IMPORTAR TABLAS   ]-----------------------###
+# NO HABILITAR AMENOS QUE SE VAYA A VOLVER A GENERAR NUEVAS TABLAS
+#30 */5 * * * php -f /var/www/html/integracion-mondelez/artisan integracion:verificar-tablas > /var/www/html/integracion-mondelez/public/log/log_cron_importar_tablas.txt
+
+###------------------[  VERIFICAR, GUARDAR INFORMACIÓN ]-----------------------###
+# CONSULTA INFORMACION WEB SERVICE, VERIFICA LA INFORMACION RESPECTO A LA QUE ESTA
+# EN LA BD (SI ESTA HABILITADO) Y LUEGO GUARDA LA INFORMACION EN LAS TABLAS IMPORTADAS
+#0 00/6 * * * php -f /var/www/html/integracion-mondelez/artisan integracion:guardar-informacion > /var/www/html/integracion-mondelez/public/log/log_cron_guardar_informacion.txt
+
+###------------------[ GENERAR PLANOS TABLAS IMPORTADAS ]----------------------###
+# GENERA PLANOS DE LAS TABLAS IMPORTADAS CON SUS RESPECTIVOS DATOS, VERIFICA CAMPOS QUEMADOS Y CONDICIONES PARA LA GENERACIÓN DE PLANOS
+#30 00/6 * * * php -f /var/www/html/integracion-mondelez/artisan integracion:generar-planos > /var/www/html/integracion-mondelez/public/log/log_cron_generar_planos.txt
+
+###--------------[ ENVIAR PLANOS GENERADOS A UN FTP O EMAIL ]------------------###
+# CONSULTA SI ESTA HABILITADO FTP O EMAIL PARA ENVIAR PLANOS GENERADOS
+#0 */7 * * * php -f /var/www/html/integracion-mondelez/artisan mondelez:generar-facturas > /var/www/html/integracion-mondelez/public/log/log_cron_enviar_planos.txt

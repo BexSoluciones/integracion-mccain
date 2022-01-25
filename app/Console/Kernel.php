@@ -17,6 +17,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\GuardarInformacion',
         'App\Console\Commands\GenerarPlanos',
         'App\Console\Commands\EnviarPlanos',
+        'App\Console\Commands\WebService',
     ];
 
     /**
@@ -31,6 +32,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('integracion:guardar-informacion')->cron('0 00,06 * * *');
         $schedule->command('integracion:generar-planos')->cron('0 00,06 * * *');
         $schedule->command('integracion:enviar-planos')->cron('0 00,06 * * *');
+        $schedule->command('integracion:webservice')->cron('0 00,06 * * *');
     }
 
     /**

@@ -12,25 +12,53 @@ use App\Modelo\LogTable;
 
 class Funciones extends Model {   
 
+    public static function TrimVal($val){ return trim($val); }
+
+    public static function TrimArray($array){ 
+        $expl = explode(',', $array); $dataRay = array();
+        foreach ($expl as $key => $value) {
+            $val = str_replace([' ','"'], '', $value); $resVal = trim($val);
+            array_push($dataRay, $resVal);
+        }
+        return $dataRay;
+    }
+
+    public static function getTableColumns($table){
+        return Schema::getColumnListing($table);
+    }
+
+    public static function deglosarNombre($nombre,$position){
+        $name = str_replace("  ", " ", $nombre); 
+        $nameEXPLODE = explode(" ", $name); 
+        
+        if (count($nameEXPLODE) == 1) {
+            if ($position == 1) { return trim($nameEXPLODE[0]); }else{ return ""; }
+        }else if (count($nameEXPLODE) == 2) {
+            if ($position == 1) { return trim($nameEXPLODE[0]); }else{ return trim($nameEXPLODE[1]); }
+        }else if (count($nameEXPLODE) == 3) {
+            if ($position == 1) { return trim($nameEXPLODE[0]); }else{ return trim($nameEXPLODE[1])." ".trim($nameEXPLODE[2]); }
+        }else if (count($nameEXPLODE) == 4) {
+            if ($position == 1) { return trim($nameEXPLODE[0])." ".trim($nameEXPLODE[1]); }else{ return trim($nameEXPLODE[2])." ".trim($nameEXPLODE[3]); }
+        }
+
+    }
+
     public static function convertirObjetosArrays($objetos){       
         $arrayValues = [];  $acumValues = 0;
         foreach ($objetos as $key => $objeto) {
             $arrayValuesRow = [];
             foreach ($objeto as $keyb => $valores) {
-                if ($valores != '') {
-                    $arrayValuesRow[(String) $keyb] = (String) "'".$valores."'";
+                $value = ltrim($valores); $value = rtrim($valores);
+                if ($value != '') {
+                    $arrayValuesRow[(String) $keyb] = (String) "'".htmlspecialchars($value)."'";
                 }else{
-                    $arrayValuesRow[(String) $keyb] = (String) "NULL";
+                    $arrayValuesRow[(String) $keyb] = (String) "NO";
                 }
             }
             $arrayValues[$acumValues] = (array) $arrayValuesRow;
             $acumValues++;
         }
         return $arrayValues;
-    }
-
-    public static function getTableColumns($table){
-        return Schema::getColumnListing($table);
     }
 
     public static function convertirObjetosArraysWS($objetos,$tabla){
@@ -40,17 +68,17 @@ class Funciones extends Model {
                 $sum = 1;
                 foreach ($objetos as $keyb => $objeto) {
                     $srhColumn = false;
-                    foreach ($objeto as $keyc => $value) {
+                    foreach ($objeto as $keyc => $valores) {
                         if ($column == $keyc) { 
-                            $srhColumn = true;
+                            $srhColumn = true; $value = ltrim($valores); $value = rtrim($valores);
                             if ($value != '') {
-                                $data[$sum][$column] = $value;
+                                $data[$sum][$column] = htmlspecialchars($value);
                             }else{
-                                $data[$sum][$column] = NULL; 
+                                $data[$sum][$column] = "NO"; 
                             }
                         }                  
                     }
-                    if ($srhColumn == false) { $data[$sum][$column] = NULL; }
+                    if ($srhColumn == false) { $data[$sum][$column] = "NO"; }
                     $sum++;
                 } 
             }
@@ -120,19 +148,38 @@ class Funciones extends Model {
         if ($camp > 0 && $camp < 10) { $camp = "0".$camp; }
         return $camp;
     }
+    
 
     public static function crearTXT($plano,$ruta,$nombreFile,$ftp,$sftp){
         
-        $file = url('/')."/public/planos/".$nombreFile;
+        if (!empty($plano)) {
 
-        if (file_exists($ruta)){
-            $archivo = fopen($ruta, "w+"); fwrite($archivo, $plano); fclose($archivo);
-        }else{
-            $archivo = fopen($ruta, "w"); fwrite($archivo, $plano); fclose($archivo);
-        } 
+            if (file_exists($ruta)){ 
+                $archivo = fopen($ruta, "a+"); fwrite($archivo, $plano); fclose($archivo);
+            }else{
+                $archivo = fopen($ruta, "w+"); fwrite($archivo, $plano); fclose($archivo);
+            } 
 
-        if ($ftp === 1) { Storage::disk('ftp')->put($nombreFile, $plano); }
-        if ($sftp === 1) { Storage::disk('sftp')->put($nombreFile, $plano); }
+            if ($ftp === 1) {
+                $exist = Storage::disk('ftp')->exists($nombreFile); 
+                if (!empty($exist)) {
+                    $dataPlan = Storage::disk('ftp')->get($nombreFile); $dataPlan .= $plano;
+                    Storage::disk('ftp')->put($nombreFile, $dataPlan); 
+                }else{
+                    Storage::disk('ftp')->put($nombreFile, $plano); 
+                }
+            }
+
+            if ($sftp === 1) { 
+                $existB = Storage::disk('sftp')->exists($nombreFile);
+                if (!empty($existsB)) {
+                    $dataPlanB = Storage::disk('sftp')->get($nombreFile); $dataPlanB .= $plano;
+                    Storage::disk('sftp')->put($nombreFile, $dataPlanB); 
+                }else{
+                    Storage::disk('sftp')->put($nombreFile, $plano);
+                }                 
+            }
+        }
 
     }
 
@@ -160,6 +207,24 @@ class Funciones extends Model {
         }
     }
 
+    public static function diaVisita($dia) {
+        if ($dia == 'Lunes') {
+            return "1000000";
+        }else if ($dia == 'Martes') {
+            return "0100000";
+        }else if ($dia == 'Miercoles') {
+            return "0010000";
+        }else if ($dia == 'Jueves') {
+            return "0001000";
+        }else if ($dia == 'Viernes') {
+            return "0000100";
+        }else if ($dia == 'Sabado') {
+            return "0000010";
+        }else if ($dia == 'Domingo') {
+            return "0000001";
+        }
+    }
+
     // CREA UNA ESTRUCTURA XML CON LOS DATOS DE CONEXION Y CONSULTA DE LA BD PARA REALIZAR CIERTA CONSULTA
     public static function consultaStructuraXML($empresa,$cia,$proveedor,$usuario,$clave,$sentencia,$idConsulta,$printError,$cacheWSDL){
         $parm['printTipoError'] = $printError;
@@ -179,51 +244,79 @@ class Funciones extends Model {
     }
 
     // EJECUTA CONEXION SOAP CON LA URL DE CONEXION CONSULTADA Y LA ESTRUCTURA XML CREADA ANTERIORMENTE
-    public static function SOAP($url, $parametro){
-        try {
-            $client = new \SoapClient($url, $parametro);
-            $result = $client->EjecutarConsultaXML($parametro)->EjecutarConsultaXMLResult->any; $any = simplexml_load_string($result);
-            if (@is_object($any->NewDataSet->Resultado)) { return Funciones::convertirObjetosArrays($any->NewDataSet->Resultado); }
+    public static function SOAP($url, $parametro, $table){
+        $terminar = 1;
+        do{
+            try {
+                $client = new \SoapClient($url, $parametro);
+                $result = $client->EjecutarConsultaXML($parametro)->EjecutarConsultaXMLResult->any; $any = simplexml_load_string($result);
+                if (@is_object($any->NewDataSet->Resultado)) { return Funciones::convertirObjetosArrays($any->NewDataSet->Resultado); }
 
-            if (@$any->NewDataSet->Table) {
-                foreach ($any->NewDataSet->Table as $key => $value) {
-                    echo ("\n");
-                    echo ("\n Error Linea:\t " . $value->F_NRO_LINEA);
-                    echo ("\n Error Value:\t " . $value->F_VALOR);
-                    echo ("\n Error Desc:\t " . $value->F_DETALLE);
+                if (@$any->NewDataSet->Table) {
+                    foreach ($any->NewDataSet->Table as $key => $value) {
+                        echo ("\n");
+                        echo ("\n Error Linea:\t " . $value->F_NRO_LINEA);
+                        echo ("\n Error Value:\t " . $value->F_VALOR);
+                        echo ("\n Error Desc:\t " . $value->F_DETALLE);
+                    }
+                }  
+            }catch (\Exception $e){
+            
+                $error = self::errorSOAP($e->getMessage());
+                if ($error == true) {
+                    $reg = new LogTable; $reg->descripcion =  '´'.$table.'´ => '.$e->getMessage();
+                    if ($reg->save()) { $terminar = 0; }else{ echo '´'.$table.'´ => Excepción capturada: ', $e->getMessage(), "\n"; }
                 }
-            }  
-        }catch (\Exception $e){
-            $error = $e->getMessage(); $reg = new LogTable; $reg->descripcion = $error;
-            if ($reg->save()) {}else{ echo 'Excepción capturada: ', $e->getMessage(), "\n"; }
-        }
+                
+            }
+        }while($terminar != 0);
     }
 
     // EJECUTA CONEXION SOAP CON LA URL DE CONEXION CONSULTADA Y LA ESTRUCTURA XML CREADA ANTERIORMENTE
     public static function SOAP_SAVE($url, $parametro, $table){
-        try {
-            $client = new \SoapClient($url, $parametro);
-            $result = $client->EjecutarConsultaXML($parametro)->EjecutarConsultaXMLResult->any; $any = simplexml_load_string($result);
-            if (@is_object($any->NewDataSet->Resultado)) { return Funciones::convertirObjetosArraysWS($any->NewDataSet->Resultado,$table); }
-            if (@$any->NewDataSet->Table) {
-                foreach ($any->NewDataSet->Table as $key => $value) {
-                    echo ("\n");
-                    echo ("\n Error Linea:\t " . $value->F_NRO_LINEA);
-                    echo ("\n Error Value:\t " . $value->F_VALOR);
-                    echo ("\n Error Desc:\t " . $value->F_DETALLE);
+        $terminar = 1;
+        do{
+            try {
+                $client = new \SoapClient($url, $parametro);
+                $result = $client->EjecutarConsultaXML($parametro)->EjecutarConsultaXMLResult->any; $any = simplexml_load_string($result);
+                if (@is_object($any->NewDataSet->Resultado)) { return Funciones::convertirObjetosArraysWS($any->NewDataSet->Resultado,$table); }
+                if (@$any->NewDataSet->Table) {
+                    foreach ($any->NewDataSet->Table as $key => $value) {
+                        echo ("\n");
+                        echo ("\n Error Linea:\t " . $value->F_NRO_LINEA);
+                        echo ("\n Error Value:\t " . $value->F_VALOR);
+                        echo ("\n Error Desc:\t " . $value->F_DETALLE);
+                    }
+                }  
+            }catch (\Exception $e){
+                
+                $error = self::errorSOAP($e->getMessage());
+                if ($error == true) {
+                    $reg = new LogTable; $reg->descripcion =  '´'.$table.'´ => '.$e->getMessage();
+                    if ($reg->save()) { $terminar = 0; }else{ echo '´'.$table.'´ => Excepción capturada: ', $e->getMessage(), "\n"; }
                 }
-            }  
-        }catch (\Exception $e){
-            $error = $e->getMessage(); $reg = new LogTable; $reg->descripcion = $error;
-            if ($reg->save()) {}else{ echo 'Excepción capturada: ', $e->getMessage(), "\n"; }
-        }
+
+            }
+        }while($terminar != 0);
     }
 
-    public static function ParametroSentencia($consulta,$conexion){
-        $criterio = $consulta->criterio;
-        $sentencia = str_replace('@Cia', $conexion->cia, $consulta->sentencia);
+    public static function errorSOAP($error){
+        if ($error == 'Server was unable to process request. ---> Error al conectarse a la base de datos.Timeout expired.  The timeout period elapsed prior to obtaining a connection from the pool.  This may have occurred because all pooled connections were in use and max pool size was reached.' || strpos($error, "SOAP-ERROR: Parsing WSDL: Couldn't load from") != false || $error == 'Error Fetching http headers' || $error == 'Server was unable to process request. ---> El parámetro Sql es obligatorio y no existe en la lista de parámetros.') {
+            return false;
+        }else{ return true; }
+    }
+
+    public static function ParametroSentencia($consulta,$conexion,$artisan,$busquedAlterna){
+        $criterio = explode(',', $consulta->criterio);
+        if ($artisan == true) { $top = $consulta->top_tabla; }else{ $top = $consulta->top; }
+        if ($busquedAlterna == true) {
+            $sentencia = str_replace('@Cia', $conexion->cia, $consulta->sentencia_alterna);
+        }else{ $sentencia = str_replace('@Cia', $conexion->cia, $consulta->sentencia); }
+        
         $sentencia = str_replace('@tipoDoc', $consulta->tipo_doc, $sentencia);
         $sentencia = str_replace('@conseDoc', $consulta->consecutivo, $sentencia);
+        $sentencia = str_replace('@conseItem', $consulta->consecutivo_b, $sentencia);
+        $sentencia = str_replace('@top', $top, $sentencia);
         $sentencia = str_replace('@desdeItems', $consulta->desde_items, $sentencia);
         $sentencia = str_replace('@idPlan', $consulta->id_plan, $sentencia);
         $sentencia = str_replace('@idCriterio', $criterio[$consulta->criterio_sel], $sentencia);
@@ -232,6 +325,62 @@ class Funciones extends Model {
         $sentencia = str_replace('@idValTercero', 1, $sentencia);
         $sentencia = str_replace('@idClaseImpuesto', 1, $sentencia);
         return $sentencia;
+    }
+
+    public static function caracterEspecial($val){
+        $char = str_replace(['\u00f1','\u00e1','\u00e9','\u00ed','\u00f3','\u00fa','\u00c1','\u00c9','\u00cd','\u00d3','\u00da','\u00d1'], ['ñ','á','é','í','ó','ú','Á','É','Í','Ó','Ú','Ñ'], $val);
+        return $char;
+    }
+
+    public static function condicionPlano($planoFuncion,$valueB,$name_us,$consPlano){
+        
+        $nombreDia = self::nombreDia($valueB); 
+        $diaSemana = self::diaSemana($nombreDia); 
+        $diaName = self::diaVisita($nombreDia);
+
+        if($planoFuncion->tipo == 'fecha_a'){ 
+            if ($planoFuncion->tipo_campo == 'texto') {
+                return " ".$consPlano['entre_columna'].str_pad($diaSemana, $planoFuncion->longitud).$consPlano['entre_columna'].$consPlano['separador'];
+            }else{ return $diaSemana.$consPlano['separador']; }
+        }elseif($planoFuncion->tipo == 'fecha_b'){             
+            if ($planoFuncion->tipo_campo == 'texto') {
+                return " ".$consPlano['entre_columna'].str_pad($diaName, $planoFuncion->longitud).$consPlano['entre_columna'].$consPlano['separador'];
+            }else{ return $diaName.$consPlano['separador']; }
+        }elseif($planoFuncion->tipo == 'fecha_c'){  
+            $fech = str_replace('T', ' ', $valueB); $fech = substr($fech, 0, 19);           
+            if ($planoFuncion->tipo_campo == 'texto') {
+                return " ".$consPlano['entre_columna'].str_pad($fech, $planoFuncion->longitud).$consPlano['entre_columna'].$consPlano['separador'];
+            }else{ return $fech.$consPlano['separador']; }
+        }elseif($planoFuncion->tipo == 'agregar_cero'){ 
+            $valret = "0".$valueB;
+            if ($planoFuncion->tipo_campo == 'texto') {
+                return " ".$consPlano['entre_columna'].str_pad($valret, $planoFuncion->longitud).$consPlano['entre_columna'].$consPlano['separador'];
+            }else{ return $valret.$consPlano['separador']; }
+        }elseif($planoFuncion->tipo == 'remove'){ 
+            $valret =  str_replace($planoFuncion->nombre, '', $valueB);
+            if ($planoFuncion->tipo_campo == 'texto') {
+                return " ".$consPlano['entre_columna'].str_pad($valret, $planoFuncion->longitud).$consPlano['entre_columna'].$consPlano['separador'];
+            }else{ return $valret.$consPlano['separador']; }
+        }elseif($planoFuncion->tipo == 'exploy_name_a'){             
+            $nameExploy = self::deglosarNombre($valueB,1);
+            if ($planoFuncion->tipo_campo == 'texto') {
+                return " ".$consPlano['entre_columna'].str_pad($nameExploy, $planoFuncion->longitud).$consPlano['entre_columna'].$consPlano['separador'];
+            }else{ return $nameExploy.$consPlano['separador']; }
+        }elseif($planoFuncion->tipo == 'exploy_name_b'){ 
+            $nameExploy = self::deglosarNombre($valueB,2);
+            if ($planoFuncion->tipo_campo == 'texto') {
+                return " ".$consPlano['entre_columna'].str_pad($nameExploy, $planoFuncion->longitud).$consPlano['entre_columna'].$consPlano['separador'];
+            }else{ return $nameExploy.$consPlano['separador']; }
+        }elseif($planoFuncion->tipo == 'ultimos_dos'){ 
+            $sucursal = substr($valueB, -2);
+            if ($sucursal == 00 || $sucursal == 0) { $sucursal = 01;  }
+            if ($planoFuncion->tipo_campo == 'texto') {
+                return " ".$consPlano['entre_columna'].str_pad($sucursal, $planoFuncion->longitud).$consPlano['entre_columna'].$consPlano['separador'];
+            }else{ return $sucursal.$consPlano['separador']; }
+        }else{
+            return false;
+        }
+
     }
 
 }
