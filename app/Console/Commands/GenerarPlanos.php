@@ -46,8 +46,8 @@ class GenerarPlanos extends Command
                 
                             $tipo = explode(",", $consFormato['tipo']); $longitud = explode(",", $consFormato['longitud']); 
                             
-                            echo "<br>VALUE FOREACH:".$valueB." | ".$suma." | <br>";
-                            echo "STATE A: $campoDpl <br>";
+                            echo "VALUE FOREACH:".$valueB." | ".$suma." | "."\n";
+                            // echo "STATE A: $campoDpl <br>";
 
                             if ($valueB == 'NO') { $valueB = ''; }
 
@@ -70,13 +70,13 @@ class GenerarPlanos extends Command
                                 }
                             }
 
-                            echo "STATE B: $campoDpl <br>";
+                            // echo "STATE B: $campoDpl <br>";
 
                             // CAMPOS QUEMADOS
                             if ($campoDpl == true) {
                                 foreach ($consCampoQuemado as $campoQuemado) {
                                     if ($campoQuemado->posicion == $suma) {
-                                        $campoDpl = false; echo "$campoQuemado";
+                                        $campoDpl = false; // echo "$campoQuemado";
                                         if ($campoQuemado->tipo == 'texto') {
                                             $dataPlan .= " ".$consPlano['entre_columna'].str_pad($campoQuemado->valor, $campoQuemado->longitud).$consPlano['entre_columna'].$consPlano['separador'];
                                         }else{ $dataPlan .= $campoQuemado->valor.$consPlano['separador']; }
@@ -84,7 +84,7 @@ class GenerarPlanos extends Command
                                 }
                             }
 
-                            echo "STATE C: $campoDpl <br>";
+                            // echo "STATE C: $campoDpl <br>";
 
                             if ($campoDpl == true) {
                                 // CAMPOS CONSULTA TABLA
@@ -104,8 +104,8 @@ class GenerarPlanos extends Command
                             
                         } $sum++; $suma++;
                     }
-                    echo "<br>";
-                    echo "PLANO ANT FUNCTION: $dataPlan <br>";
+                    // echo "<br>";
+                    // echo "PLANO ANT FUNCTION: $dataPlan <br>";
                     if ($consPlano['salto_linea'] == 1) { $dataPlan .= "\n"; }
                 }   
 

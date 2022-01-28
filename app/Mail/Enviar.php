@@ -16,13 +16,14 @@ class Enviar extends Mailable
 
     public function build()
     {
-    	$correo = $this->view('correo.plano'); $ruta = 'public/plano';
+    	$correo = $this->view('correo.plano'); $ruta = '/var/www/html/integracion-coltabaco/public/plano';
+
 	    if (is_dir($ruta)){
 	        $gestor = opendir($ruta);
 	        while (($archivo = readdir($gestor)) !== false)  {	                
 	            $ruta_completa = $ruta . "/" . $archivo;
 	            if ($archivo != "." && $archivo != "..") {
-	                if (is_dir($ruta_completa)) { self::obtenerArchivos($ruta_completa); }else{ $correo->attach($ruta_completa); }
+	                if (is_dir($ruta_completa)) {  self::obtenerArchivos($ruta_completa);  }else{  $correo->attach($ruta_completa);  }
 	            }
 	        }
 	        closedir($gestor);
