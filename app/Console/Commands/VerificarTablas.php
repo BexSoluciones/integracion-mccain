@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use App\Modelo\Conexion;
 use App\Modelo\Consulta;
 use App\Modelo\Funciones;
+use App\Modelo\ConsultaConsecutivo;
 use App\Modelo\Tabla;
 use App\Modelo\LogTable;
 use DB;
@@ -20,7 +21,7 @@ class VerificarTablas extends Command
     public function __construct(){ parent::__construct(); }
     
     // FUNCION CON ARRAY DE TABLAS EXENTAS DE ELIMINAR EN LA FUNCION `SEARCH_DELETE_TABLE`
-    public static function EXCEPTION_TABLE(){ $table = ['tbl_conexion','tbl_consulta','tbl_comando','tbl_correo','tbl_plano','tbl_formato','tbl_plano_funcion','tbl_log','tbl_quemado','tbl_consulta_condicion']; return $table; }
+    public static function EXCEPTION_TABLE(){ $table = ['tbl_conexion','tbl_consulta','tbl_comando','tbl_correo','tbl_plano','tbl_formato','tbl_plano_funcion','tbl_log','tbl_quemado','tbl_consulta_condicion','tbl_consulta_consecutivo']; return $table; }
 
     // CONSULTA LISTA DE TABLAS EN ESTADO 1 Y LUEGO BUSCA SI EXISTE LAS TABLAS EN LA BD, SI NO EXISTE CREA LA TABLA CON LOS CAMPOS DEL 
     // RESULTADO WS, SI EXISTE TABLA HACE TRUNCATE EN CASO DE ESTAR ACTIVO EN LA BD. TAMBIEN  BUSCA Y ELIMINA TABLAS DE LA BD
@@ -76,7 +77,8 @@ class VerificarTablas extends Command
 
     // BUSCA INFORMACION AL WS DE LA TABLA CON PRIORIDAD 1 Y RETORNA EL RESULTADO DEL WS
     public static function TABLE_SOAP(){
-        $dataConexion = Conexion::where('estado',1)->first(); $listaConsulta = Consulta::where('prioridad',1)->first(); $sentencia = Funciones::ParametroSentencia($listaConsulta,$dataConexion,true,false); $xml = Funciones::consultaStructuraXML($dataConexion->conexion,$dataConexion->cia,$dataConexion->proveedor,$dataConexion->usuario,$dataConexion->clave,$sentencia,$dataConexion->consulta,1,0);
+        $dataConexion = Conexion::where('estado',1)->first(); $listaConsulta = Consulta::where('prioridad',1)->first(); $consecutivoCons = ConsultaConsecutivo::where('consulta',$listaConsulta->codigo)->first(); 
+        $sentencia = Funciones::ParametroSentencia($listaConsulta,$dataConexion,true,false,$consecutivoCons); $xml = Funciones::consultaStructuraXML($dataConexion->conexion,$dataConexion->cia,$dataConexion->proveedor,$dataConexion->usuario,$dataConexion->clave,$sentencia,$dataConexion->consulta,1,0);
         $resultado = Funciones::SOAP($dataConexion->url, $xml, $listaConsulta->tabla_destino);
         return $resultado;
     }

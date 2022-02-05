@@ -133,7 +133,7 @@ class Funciones extends Model {
         return $texto;
     }
 
-     public static function RutaDate($campo){
+    public static function RutaDate($campo){
         
         $camp = $campo;
 
@@ -141,41 +141,14 @@ class Funciones extends Model {
             $camp = date('d');
         }else if ($campo == 'MM') {
             $camp = date('m');
+        }else if ($campo == '--AA') {
+            $camp = substr(date('Y'), -2);
         }else if ($campo == 'AA') {
             $camp = date('Y');
-        }else if ($campo == 'SS') {
-            $camp = date('Y-m-d'); $camp = self::weekOfMonth($camp);
         }
 
-        if ($campo == 'SS') {
-            if ($camp > 0 && $camp < 10) { $camp = "0".$camp; }
-        }
-
+        if ($camp > 0 && $camp < 10) { $camp = $camp; }
         return $camp;
-    }
-
-    public static function weekOfMonth($date) {
-        //Get the first day of the month.
-        $date = strtotime($date);
-        $firstOfMonth = strtotime(date("Y-m-01", $date));
-        //Apply above formula.
-        return self::weekOfYear($date) - self::weekOfYear($firstOfMonth) + 1;
-    }
-
-    public static function weekOfYear($date) {
-        $weekOfYear = intval(date("W", $date));
-        if (date('n', $date) == "1" && $weekOfYear > 51) {
-            // It's the last week of the previos year.
-            return 0;
-        }
-        else if (date('n', $date) == "12" && $weekOfYear == 1) {
-            // It's the first week of the next year.
-            return 53;
-        }
-        else {
-            // It's a "normal" week.
-            return $weekOfYear;
-       }
     }
     
 
@@ -279,7 +252,7 @@ class Funciones extends Model {
             try {
                 $client = new \SoapClient($url, $parametro);
                 $result = $client->EjecutarConsultaXML($parametro)->EjecutarConsultaXMLResult->any; $any = simplexml_load_string($result);
-                if (@is_object($any->NewDataSet->Resultado)) { return Funciones::convertirObjetosArrays($any->NewDataSet->Resultado); }
+                if (@is_object($any->NewDataSet->Resultado)) { return Funciones::convertirObjetosArrays($any->NewDataSet->Resultado); }else{ $terminar = 0; }
 
                 if (@$any->NewDataSet->Table) {
                     foreach ($any->NewDataSet->Table as $key => $value) {
@@ -308,7 +281,7 @@ class Funciones extends Model {
             try {
                 $client = new \SoapClient($url, $parametro);
                 $result = $client->EjecutarConsultaXML($parametro)->EjecutarConsultaXMLResult->any; $any = simplexml_load_string($result);
-                if (@is_object($any->NewDataSet->Resultado)) { return Funciones::convertirObjetosArraysWS($any->NewDataSet->Resultado,$table); }
+                if (@is_object($any->NewDataSet->Resultado)) { return Funciones::convertirObjetosArraysWS($any->NewDataSet->Resultado,$table); }else{ $terminar = 0; }
                 if (@$any->NewDataSet->Table) {
                     foreach ($any->NewDataSet->Table as $key => $value) {
                         echo ("\n");
@@ -318,7 +291,6 @@ class Funciones extends Model {
                     }
                 }  
             }catch (\Exception $e){
-                
                 $error = self::errorSOAP($e->getMessage());
                 if ($error == true) {
                     $reg = new LogTable; $reg->descripcion =  '´'.$table.'´ => '.$e->getMessage();
@@ -335,16 +307,19 @@ class Funciones extends Model {
         }else{ return true; }
     }
 
-    public static function ParametroSentencia($consulta,$conexion,$artisan,$busquedAlterna){
+    public static function ParametroSentencia($consulta,$conexion,$artisan,$busquedAlterna,$consecutivoDat){
         $criterio = explode(',', $consulta->criterio);
         if ($artisan == true) { $top = $consulta->top_tabla; }else{ $top = $consulta->top; }
         if ($busquedAlterna == true) {
             $sentencia = str_replace('@Cia', $conexion->cia, $consulta->sentencia_alterna);
         }else{ $sentencia = str_replace('@Cia', $conexion->cia, $consulta->sentencia); }
         
-        $sentencia = str_replace('@tipoDoc', $consulta->tipo_doc, $sentencia);
-        $sentencia = str_replace('@conseDoc', $consulta->consecutivo, $sentencia);
-        $sentencia = str_replace('@conseItem', $consulta->consecutivo_b, $sentencia);
+        if ($consecutivoDat != null) {
+            $sentencia = str_replace('@tipoDoc', $consecutivoDat->tipo_documento, $sentencia);
+            $sentencia = str_replace('@conseDoc', $consecutivoDat->consecutivo, $sentencia);
+            $sentencia = str_replace('@conseItem', $consecutivoDat->consecutivo_b, $sentencia);
+        }
+
         $sentencia = str_replace('@top', $top, $sentencia);
         $sentencia = str_replace('@desdeItems', $consulta->desde_items, $sentencia);
         $sentencia = str_replace('@idPlan', $consulta->id_plan, $sentencia);
@@ -390,22 +365,27 @@ class Funciones extends Model {
             if ($planoFuncion->tipo_campo == 'texto') {
                 return " ".$consPlano['entre_columna'].str_pad($valret, $planoFuncion->longitud).$consPlano['entre_columna'].$consPlano['separador'];
             }else{ return $valret.$consPlano['separador']; }
-        }elseif($planoFuncion->tipo == 'exploy_name_a'){             
+
+        }elseif($planoFuncion->tipo == 'ultimos_dos'){ 
+            $valremov =  substr($valueB, -2);
+            if ($valremov == '00' || $valremov == '0') { $valremov = '01';  }
+            if ($planoFuncion->tipo_campo == 'texto') {
+                return " ".$consPlano['entre_columna'].str_pad($valremov, $planoFuncion->longitud).$consPlano['entre_columna'].$consPlano['separador'];
+            }else{ return $valremov.$consPlano['separador']; }
+
+        }elseif($planoFuncion->tipo == 'exploy_name_a'){ 
+            
             $nameExploy = self::deglosarNombre($valueB,1);
             if ($planoFuncion->tipo_campo == 'texto') {
                 return " ".$consPlano['entre_columna'].str_pad($nameExploy, $planoFuncion->longitud).$consPlano['entre_columna'].$consPlano['separador'];
             }else{ return $nameExploy.$consPlano['separador']; }
+
         }elseif($planoFuncion->tipo == 'exploy_name_b'){ 
+
             $nameExploy = self::deglosarNombre($valueB,2);
             if ($planoFuncion->tipo_campo == 'texto') {
                 return " ".$consPlano['entre_columna'].str_pad($nameExploy, $planoFuncion->longitud).$consPlano['entre_columna'].$consPlano['separador'];
             }else{ return $nameExploy.$consPlano['separador']; }
-        }elseif($planoFuncion->tipo == 'ultimos_dos'){ 
-            $sucursal = substr($valueB, -2);
-            if ($sucursal == 00 || $sucursal == 0) { $sucursal = 01;  }
-            if ($planoFuncion->tipo_campo == 'texto') {
-                return " ".$consPlano['entre_columna'].str_pad($sucursal, $planoFuncion->longitud).$consPlano['entre_columna'].$consPlano['separador'];
-            }else{ return $sucursal.$consPlano['separador']; }
         }else{
             return false;
         }

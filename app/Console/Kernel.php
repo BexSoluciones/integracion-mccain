@@ -13,6 +13,7 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
+    	'App\Console\Commands\VerificarTipoDocumento',
         'App\Console\Commands\VerificarTablas',
         'App\Console\Commands\GuardarInformacion',
         'App\Console\Commands\GenerarPlanos',
@@ -28,11 +29,11 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('integracion:verificar-tablas')->cron('0 00,06 * * *');
-        $schedule->command('integracion:guardar-informacion')->cron('0 00,06 * * *');
-        $schedule->command('integracion:generar-planos')->cron('0 00,06 * * *');
-        $schedule->command('integracion:enviar-planos')->cron('0 00,06 * * *');
-        $schedule->command('integracion:webservice')->cron('0 00,06 * * *');
+        // $schedule->command('integracion:verificar-tablas')->cron('0 00,06 * * *');
+        // $schedule->command('integracion:guardar-informacion')->cron('0 00,06 * * *');
+        // $schedule->command('integracion:generar-planos')->cron('0 00,06 * * *');
+        // $schedule->command('integracion:enviar-planos')->cron('0 00,06 * * *');
+        // $schedule->command('integracion:webservice')->cron('0 00,06 * * *');
     }
 
     /**

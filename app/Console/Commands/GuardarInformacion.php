@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Log;
 use App\Modelo\Conexion;
 use App\Modelo\Consulta;
 use App\Modelo\ConsultaCondicion;
+use App\Modelo\ConsultaConsecutivo;
 use App\Modelo\Funciones;
 use App\Modelo\Tabla;
 use App\Modelo\LogTable;
@@ -19,124 +20,179 @@ class GuardarInformacion extends Command
 
     public function handle(){
 
+        //OBTIENE LISTA DE CONEXION & CONSULTAS REGISTRADAS QUE ESTEN EN ESTADO 1
         $dataConexion = Conexion::where('estado',1)->first(); $listaConsulta = Consulta::where('estado',1)->orderBy('codigo','asc')->get(); $resultado = array(); LogTable::truncate(); 
+
+        //RECORRE LISTA DE CONSULTAS REGISTRADAS
         foreach ($listaConsulta as $value) {
-            echo "<br>##################### $value->tabla_destino ####################################<br>";
+
+            echo "<br>##################### $value->tabla_destino ####################################<br>\n";
+
+            //CONSULTA LISTA DE CONSECUTIVOS QUE TIENE LA CONSULTA QUE ESTA RECORRIENDO
+            $consecutivosTabla = ConsultaConsecutivo::where('consulta',$value->codigo)->get();
+
             $consTabla = new Tabla; $consTabla->getTable(); $consTabla->bind($value->tabla_destino); 
-            if ($value->truncate == '1') { $consTabla->truncate(); 
-                Consulta::where('codigo',$value->codigo)->where('consecutivo','>',0)->update(['consecutivo' => 1]); 
-                Consulta::where('codigo',$value->codigo)->where('consecutivo_b','>',0)->update(['consecutivo_b' => 1]); 
+
+            // VERIFICA SI TRUNCATE ESTA ACTIVADO EN LA CONFIG DE CONSULTA
+            if ($value->truncate == '1') { 
+                $consTabla->truncate();  // BORRA REGISTROS PREVIOS DE TABLA CONSULTADA
+                //ACTUALIZA EN 1 EL COMIENZO DE CONSECUTIVOS DE LA CONSULTA PARA EMPEZAR BUSQUEDA DESDE 1
+                ConsultaConsecutivo::where('consulta',$value->codigo)->where('consecutivo','>',0)->update(['consecutivo' => 1]);
+                ConsultaConsecutivo::where('consulta',$value->codigo)->where('consecutivo_b','>',0)->update(['consecutivo_b' => 1]);
             }
-            $stopWhile = 1; $busqueda_alterna = false;
             
-            $dataTableReg = $consTabla->get();
+            //DECLARACION DE VARIABLES PARA POSTERIOR USO EN EL RECORRIDO DE DATOS CONSULTADOS SOAP
+            $stopWhile = 1; $busqueda_alterna = false; $dataTableReg = $consTabla->get();
 
-            do{
-                if ($busqueda_alterna == true) { echo "<br> EMPEZANDO BUSQUEDA ALTERNA <br>"; }
-                $sentencia = Funciones::ParametroSentencia($value,$dataConexion,false,$busqueda_alterna);
-                $xml = Funciones::consultaStructuraXML($dataConexion->conexion,$dataConexion->cia,$dataConexion->proveedor,$dataConexion->usuario,$dataConexion->clave,$sentencia,$dataConexion->consulta,1,0);
-                $datos = Funciones::SOAP_SAVE($dataConexion->url, $xml, $value->tabla_destino);
-                $resultado = Funciones::SOAP($dataConexion->url, $xml, $value->tabla_destino);
-                
-                if (is_array($resultado) && is_array($datos)) { 
-                    echo "<br>================= $value->tabla_destino ================================<br>"; 
-                    //print_r($datos); // print_r($resultado);               
+            //RECORREMOS CADA UNO DE LOS TIPOS DE CONSECUTIVOS QUE TENGA CADA CONSULTA
+            foreach ($consecutivosTabla as $consecutivoValue) {
 
-                    $condicionRegistro = ConsultaCondicion::where('id_consulta',$value->codigo)->get();  
-                    foreach ($resultado as $resKey => $valres) {
-                        echo "<br>".print_r($valres)."<br>";
-                        $reselect = null; $regCond = true;
+                //CREACION DE BUCLE PARA RECORRER CONSULTA
+                do{ 
 
-                        if (count($condicionRegistro) > 0) {
+                    echo "<br> RODANDO BUCLE <br>\n";
+
+                    $continuarSOAP = true;
+                    //SI NO ARROJA RESULTADOS LA PRIMERA SENTENCIA, EJECUTA LA SENTENCIA ALTERNA REGISTRADA EN LA CONSULTA               
+                    if ($busqueda_alterna == true) { 
+                        echo "<br> EMPEZANDO BUSQUEDA ALTERNA <br>\n"; 
+                        if ($value->sentencia_alterna == null) { $continuarSOAP = false; }
+                    }
+
+                    if ($continuarSOAP == true) {
+
+                        //REMPLAZA PARAMETROS QUE TENGA LA SENTENCIA "@.." POR LOS PARAMETROS CORRESPONDIENTES EN LA TABLA DE CONSULTAS
+                        $sentencia = Funciones::ParametroSentencia($value,$dataConexion,false,$busqueda_alterna,$consecutivoValue);
+                        
+                        //CONSTRUCTOR DE XML PARA CONSULTAR POR SOAP 
+                        $xml = Funciones::consultaStructuraXML($dataConexion->conexion,$dataConexion->cia,$dataConexion->proveedor,$dataConexion->usuario,$dataConexion->clave,$sentencia,$dataConexion->consulta,1,0);
+
+                        //RESULTADO DATOS CONSULTA SOAP
+                        $datos = Funciones::SOAP_SAVE($dataConexion->url, $xml, $value->tabla_destino);
+                        $resultado = Funciones::SOAP($dataConexion->url, $xml, $value->tabla_destino);
+
+                        //VERIFICAMOS SI ARROJA RESULTADOS
+                        if (is_array($resultado) && is_array($datos)) { 
+                            echo "<br>================= $value->tabla_destino ================================<br>\n"; 
                             
-                            echo "TABLA REGISTRO: ".count($dataTableReg);
-                            // print_r($dataTableReg);
-                            echo "<br>";
+                            //CONSULTA LISTA DE CONDICIONES PARA VALIDACION Y PASAR A REGISTRO
+                            $condicionRegistro = ConsultaCondicion::where('id_consulta',$value->codigo)->get();  
 
-                            $arrayCondB = explode(',', $condicionRegistro[0]['condicion']); $totalCondRay = count($arrayCondB);
-                            echo "------------------------------------------------------------------------------------------------<br>";
-                            echo "CONDICIONES: ".$totalCondRay;
-                            echo "<br>------------------------------------------------------------------------------------------------<br>";
+                            //RECORRE RESULTADO DE DATOS ARROJADOS EN LA CONSULTA SOAP
+                            foreach ($resultado as $resKey => $valres) {
+                                echo "<br>".print_r($valres)."<br>";
 
-                            foreach ($dataTableReg as $valueCond) {
+                                //DECLARACION DE VARIABLE PARA VALIDAR REGITRO DE DATO, REINICIA EN CADA RECORRIDO DE RESULTADO SOAP
+                                $regCond = true; //$reselect = null; 
 
-                                $arrayCondicion = array(); 
-                                foreach ($arrayCondB as $keyArrB => $valueArrB) {
-                                    $dataCond = trim($valueCond[$valueArrB]); 
-                                    array_push($arrayCondicion, $dataCond);
-                                }
-
-                                $suCond = 0;
-                                foreach ($arrayCondicion as $keyCond => $valuKyCond) {
-                                    echo "<br>________________________________________________________________________________________________<br>";
-                                    $valuKyCond = trim($valuKyCond);
-                                    if ($valuKyCond == 'NO') {
-                                        $clave = array_search("NO", $valres); if ($clave != '') { $suCond++; }
-                                    }else{
-                                        $clave = array_search("'".$valuKyCond."'", $valres); if ($clave != '') { $suCond++; }
-                                    }
-                                    // print_r($valres);
-                                    // $resVal = Funciones::TrimArray($valres);
-                                    // print_r($resVal);
+                                //VALIDA SI LA CONSULTA CUENTA CON CONDICIONES REGISTRADAS 
+                                if (count($condicionRegistro) > 0) {
                                     
+                                    echo "TABLA REGISTRO: ".count($dataTableReg);
+                                    // print_r($dataTableReg);
+                                    echo "<br>";
+
+                                    //CREAMOS UN ARRAY APARTIR DEL RESULTADO DE CONDICIONES Y OBTENEMOS LA CANTIDAD DE RESULTADOS
+                                    $arrayCondB = explode(',', $condicionRegistro[0]['condicion']); $totalCondRay = count($arrayCondB);
+                                    echo "------------------------------------------------------------------------------------------------<br>x";
+                                    echo "CONDICIONES: ".$totalCondRay."\n";
+                                    echo "<br>------------------------------------------------------------------------------------------------<br>\n";
+
+                                    //RECORREMOS DATOS REGISTRADOS PREVIAMENTE DE LA TABLA CONSULTADA
+                                    foreach ($dataTableReg as $valueCond) {
+
+                                        $arrayCondicion = array(); //DECLARACION DE ARRAY PARA GUARDAR RESULTADO DE LA CONSULTA DE CAMPO ESPECIFICO DECLARADO EN LA LISTA DE CONDICIONES
+
+                                        //RECORRE LISTA DE CONDICIONES
+                                        foreach ($arrayCondB as $keyArrB => $valueArrB) {
+                                            $dataCond = trim($valueCond[$valueArrB]); //CONSULTA LA INFORMACION DE UN CAMPO PERTENECIENTE A LA TABLA "X" DEL CAMPO "Y" DE LA CONDICION RECORRIDA, ELIMINA ESPACIOS EN BLANCO
+                                            array_push($arrayCondicion, $dataCond); //GUARDA LA INFORMACION DEL CAMPO CONSULTADO Y GUARDA EN EL ARRAY ANTERIOMENTE DECLARADO
+                                        }
+
+                                        $suCond = 0; //DELCARACION DE VARIABLE PARA POSTERIOMENTE VALIDAR CUMPLIMIENTO DE CONDICION
+
+                                        // RECORREMOS ARRAY PREVIAMENTE DECLARADO PARA GUARDAR CONDICIONES, DONDE SE GUARDO LA INFORMACION ESPECIFICA EXTRAIDA DE LA TABLA "X"
+                                        foreach ($arrayCondicion as $keyCond => $valuKyCond) {
+                                            echo "<br>________________________________________________________________________________________________<br>\n";
+                                            $valuKyCond = trim($valuKyCond); //ELIMINAMOS POSIBLES ESPACIOS EN BLANCO
+
+                                            // VALIDAMOS SI EL CAMPO TIENE O 'NO' TIENE INFORMACION, SE BUSCA EN EL RESULTADO SOAP POSIBLES DATOS IGUALES AL DE LA CONDICIONES RECORRIDA, SUMA EN CASO TAL DE ENCONTRAR COINCIDENCIA A LA VARIABLE $suCond 
+                                            if ($valuKyCond == 'NO') {
+                                                $clave = array_search("NO", $valres); if ($clave != '') { $suCond++; } //
+                                            }else{
+                                                $clave = array_search("'".$valuKyCond."'", $valres); if ($clave != '') { $suCond++; }
+                                            }
+                                            
+                                        }
+
+                                        //SI EL TOTAL EN LA SUMA DE CONDICIONES RECORRIDAS ES IGUAL A LA CANTIDAD DE CONDICIONES CONSULTADAS ENTONCES DECLARA COMO FALSE EL POSTERIOR REGISTRO DEL DATO A LA BASE DE DATOS
+                                        if ($totalCondRay == $suCond) { $regCond = false; }
+                                        
+                                        echo "<br>________________________________________________________________________________________________<br>\n";
+                                        echo "DATA FILA:"; print_r($arrayCondicion); echo " TIENE [".$suCond."] INTERSECCIONES";
+                                        echo "<br>________________________________________________________________________________________________<br>\n";
+
+                                    }                            
+
+                                }else{ 
+                                    echo "NO TIENE CONDICIÓN <br>"; 
+                                }
+         
+                                echo "<br><br>";
+
+                                $keyDat = $resKey+1; //DECLARAMOS LA POSICION DEL KEY DE RESULTADOS SOAP QUE QUEREMOS REGISTRAR
+
+                                echo "============= CONSECUTIVO $consecutivoValue->consecutivo =============== \n";
+                                // dd($datos);
+                                // echo "============= DATOS $keyDat =============== \n";
+                                
+                                // SI LA CONDICION PREVIA PARA REGISTRO ES TRUE
+                                if ($regCond == true) { 
+                                    echo "DATA REGISTRADO"; // VALIDA NUEVAMENTE QUE EL ARRAY CON DATOS SOAP CUENTE CON DATOS Y REGISTRA EN LA TABLA CONSULTADA LA INFORMACION
+                                    if (count($datos) > 0) { $consTabla->insert($datos[$keyDat]); }                            
+                                }else{ unset($datos[$keyDat]); } // DE LO CONTRARIO EL SISTEMA CONCLUYE QUE EL DATO YA ESTA REGISTRADO O NO ES APTO PARA EL REGISTRO, ELIMINA ESTE DATO DEL ARRAY SOAP
+
+                                $endArray = end($resultado); // CONSULTA EL ULTIMO REGISTRO DEL ARRAY SOAP
+
+                                //VALIDA EL CONSECUTIVO SEA MAYOR A 0 PARA ACTUALIZAR AL CONSECUTIVO DEL ULTIMO REGISTRO IMPORTADO EN EL ARRAY SOAP
+                                if ($consecutivoValue->consecutivo > 0) {
+                                    //CONSULTAMOS EL DATO EN EL ULTIMO REGISTRO ARROJADO POR SOAP, EL CAMPO GUARDADO EN LA CONSULTA PARA EXTRAER CONSECUTIVO
+                                    if (isset($endArray[$consecutivoValue->campo_consecutivo])) {
+                                        $valRay = str_replace("'", "", $endArray[$consecutivoValue->campo_consecutivo]);
+                                        ConsultaConsecutivo::where('codigo',$consecutivoValue->codigo)->update(['consecutivo' => $valRay]);
+                                    }                    
                                 }
 
-                                if ($totalCondRay == $suCond) { $regCond = false; }
-                                
-                                echo "<br>________________________________________________________________________________________________<br>";
-                                echo "DATA FILA:"; print_r($arrayCondicion); echo " TIENE [".$suCond."] INTERSECCIONES";
-                                echo "<br>________________________________________________________________________________________________<br>";
+                                //VALIDA EL CONSECUTIVO B SEA MAYOR A 0 PARA ACTUALIZAR AL CONSECUTIVO DEL ULTIMO REGISTRO IMPORTADO EN EL ARRAY SOAP
+                                if ($consecutivoValue->consecutivo_b > 0) {
+                                    //CONSULTAMOS EL DATO EN EL ULTIMO REGISTRO ARROJADO POR SOAP, EL CAMPO GUARDADO EN LA CONSULTA PARA EXTRAER CONSECUTIVO B 
+                                    if (isset($endArray[$consecutivoValue->campo_consecutivo_b])) {
+                                        $valRayB = str_replace("'", "", $endArray[$consecutivoValue->campo_consecutivo_b]);
+                                        ConsultaConsecutivo::where('codigo',$consecutivoValue->codigo)->update(['consecutivo_b' => $valRayB]);
+                                    }
+                                }
 
-                            }                            
-
-                        }else{ 
-                            echo "NO TIENE CONDICIÓN <br>"; 
-                        }
- 
-                        echo "<br><br>";
-
-                        $keyDat = $resKey+1;
-
-                        if ($regCond == true) { 
-                            echo "DATA REGISTRADO";
-                            if (count($datos) > 0) { $consTabla->insert($datos[$keyDat]); }                            
-                        }else{ unset($datos[$keyDat]); }
-
-                        $endArray = end($resultado);
-                        if ($value->consecutivo > 0) {
-                            if (isset($endArray[$value->campo_consecutivo])) {
-                                $valRay = str_replace("'", "", $endArray[$value->campo_consecutivo]);
-                                Consulta::where('codigo',$value->codigo)->where('estado',1)->update(['consecutivo' => $valRay]);
-                            }                    
-                        }
-                        if ($value->consecutivo_b > 0) {
-                            if (isset($endArray[$value->campo_consecutivo_b])) {
-                                $valRayB = str_replace("'", "", $endArray[$value->campo_consecutivo_b]);
-                                Consulta::where('codigo',$value->codigo)->where('estado',1)->update(['consecutivo_b' => $valRayB]);
                             }
+
+                            $stopWhile = 0;
+
+                        }else{
+
+                            if ($busqueda_alterna == true) {      
+                                $stopWhile = 0; 
+                            }else{ 
+                                $busqueda_alterna = true; 
+                            }
+
+                            echo "<br> DEFINIENDO BUCLE $stopWhile <br>\n";
+
                         }
+                    }else{ $stopWhile = 0;  }                                      
 
-                    }
+                }while($stopWhile != 0);
+            }
 
-                    // print_r($datos);
-                    $stopWhile = 0;
-
-                }else{
-
-                    // print_r($resultado);
-                    // print_r($datos);
-
-                    if ($busqueda_alterna == true) {                        
-                        // if ($ultimoLog['descripcion'] == '') {
-                        //     # code...
-                        // }
-                        $stopWhile = 0; 
-                    }else{ 
-                        $busqueda_alterna = true; 
-                    }
-                }
-
-            }while($stopWhile != 0);
+            
             
         }
     }  

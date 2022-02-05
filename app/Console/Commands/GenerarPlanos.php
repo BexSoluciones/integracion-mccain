@@ -29,7 +29,12 @@ class GenerarPlanos extends Command
             $consCampoQuemado = CampoQuemado::where('id_consulta',$value->codigo)->get();
             $consFormato = Formato::where('id_consulta',$value->codigo)->first();
             $consTabla = new Tabla; $consTabla->getTable(); $consTabla->bind($value->tabla_destino); 
-            $resCons = $consTabla->where('planoRegistro',0)->orderBy($value->orderBy,$value->orderType)->get();
+
+            if ($value->group_by != null) {
+                $resCons = $consTabla->where('planoRegistro',0)->orderBy($value->orderBy,$value->orderType)->get();
+            }else{
+                $resCons = $consTabla->where('planoRegistro',0)->groupBy($value->group_by)->orderBy($value->orderBy,$value->orderType)->get();
+            }
 
             $dataPlan = null; $name_us = null;
             foreach ($resCons as $keya => $valueA) {                
@@ -95,7 +100,7 @@ class GenerarPlanos extends Command
                                     $longitudR = Funciones::ReplaceText($longitud[$suma]);
                                     
                                     if ($tipoR == 'texto') {
-                                        $dataPlan .= " ".$consPlano['entre_columna'].str_pad($valueB, $longitudR).$consPlano['entre_columna'].$consPlano['separador'];
+                                        $dataPlan .= "".$consPlano['entre_columna'].str_pad($valueB, $longitudR).$consPlano['entre_columna'].$consPlano['separador'];
                                     }else{ $dataPlan .= $valueB.$consPlano['separador']; }
 
                                 }   
