@@ -30,7 +30,7 @@ class GenerarPlanos extends Command
             $consFormato = Formato::where('id_consulta',$value->codigo)->first();
             $consTabla = new Tabla; $consTabla->getTable(); $consTabla->bind($value->tabla_destino); 
 
-            if ($value->group_by != null) {
+            if ($value->group_by == '') {
                 $resCons = $consTabla->where('planoRegistro',0)->orderBy($value->orderBy,$value->orderType)->get();
             }else{
                 $resCons = $consTabla->where('planoRegistro',0)->groupBy($value->group_by)->orderBy($value->orderBy,$value->orderType)->get();
@@ -119,7 +119,7 @@ class GenerarPlanos extends Command
             if ($dataPlan != null) {
                 $nombreFile = Funciones::NombreArchivo($consPlano); 
                 //$rutaFile = "public/plano/".$nombreFile; 
-                $rutaFile = $consPlano['ruta'].$nombreFile;
+                $rutaFile = $consPlano['ruta'].$nombreFile; $dataPlan = str_replace('\/',"/", $dataPlan);
                 Funciones::crearTXT($dataPlan,$rutaFile,$nombreFile,$consPlano['ftp'],$consPlano['sftp']);
                 $consTabla->where('planoRegistro',0)->update(['planoRegistro' => 1]);        
             }        

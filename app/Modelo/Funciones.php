@@ -145,12 +145,38 @@ class Funciones extends Model {
             $camp = substr(date('Y'), -2);
         }else if ($campo == 'AA') {
             $camp = date('Y');
+        }else if ($campo == 'SS') {
+            $camp = date('Y-m-d'); $camp = self::weekOfMonth($camp);
         }
 
-        if ($camp > 0 && $camp < 10) { $camp = $camp; }
+        if (strlen($camp) < 2) { $camp = "0".$camp; }
+
         return $camp;
     }
     
+    public static function weekOfMonth($date) {
+        //Get the first day of the month.
+        $date = strtotime($date);
+        $firstOfMonth = strtotime(date("Y-m-01", $date));
+        //Apply above formula.
+        return self::weekOfYear($date) - self::weekOfYear($firstOfMonth) + 1;
+    }
+
+    public static function weekOfYear($date) {
+        $weekOfYear = intval(date("W", $date));
+        if (date('n', $date) == "1" && $weekOfYear > 51) {
+            // It's the last week of the previos year.
+            return 0;
+        }
+        else if (date('n', $date) == "12" && $weekOfYear == 1) {
+            // It's the first week of the next year.
+            return 53;
+        }
+        else {
+            // It's a "normal" week.
+            return $weekOfYear;
+       }
+    }
 
     public static function crearTXT($plano,$ruta,$nombreFile,$ftp,$sftp){
         
