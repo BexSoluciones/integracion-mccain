@@ -213,7 +213,7 @@ class Funciones extends Model {
 
     public static function nombreDia($fecha) {
         $dias = array('Domingo','Lunes','Martes','Miercoles','Jueves','Viernes','Sabado');
-        $fecha = $dias[date('N', strtotime($fecha))];
+        $fecha = $dias[date('N', strtotime('2022-02-05'))]; 
         return $fecha;
     }
 
