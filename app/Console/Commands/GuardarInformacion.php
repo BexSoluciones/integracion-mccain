@@ -29,6 +29,7 @@ class GuardarInformacion extends Command
             echo "<br>##################### $value->tabla_destino ####################################<br>\n";
 
             //CONSULTA LISTA DE CONSECUTIVOS QUE TIENE LA CONSULTA QUE ESTA RECORRIENDO
+            ConsultaConsecutivo::where('consulta',$value->codigo)->where('consecutivo_b','>',0)->update(['consecutivo_b' => 1]);
             $consecutivosTabla = ConsultaConsecutivo::where('consulta',$value->codigo)->get();
 
             $consTabla = new Tabla; $consTabla->getTable(); $consTabla->bind($value->tabla_destino); 
@@ -41,16 +42,18 @@ class GuardarInformacion extends Command
                 ConsultaConsecutivo::where('consulta',$value->codigo)->where('consecutivo_b','>',0)->update(['consecutivo_b' => 1]);
             }
             
-            //DECLARACION DE VARIABLES PARA POSTERIOR USO EN EL RECORRIDO DE DATOS CONSULTADOS SOAP
-            $stopWhile = 1; $busqueda_alterna = false; $dataTableReg = $consTabla->get();
+            $dataTableReg = $consTabla->get();
 
             //RECORREMOS CADA UNO DE LOS TIPOS DE CONSECUTIVOS QUE TENGA CADA CONSULTA
             foreach ($consecutivosTabla as $consecutivoValue) {
 
+                //DECLARACION DE VARIABLES PARA POSTERIOR USO EN EL RECORRIDO DE DATOS CONSULTADOS SOAP
+                $stopWhile = 1; $busqueda_alterna = false; 
+
                 //CREACION DE BUCLE PARA RECORRER CONSULTA
                 do{ 
 
-                    echo "<br> RODANDO BUCLE <br>\n";
+                    echo "<br> ===============> $consecutivoValue->tipo_documento RODANDO BUCLE <br>\n";
 
                     $continuarSOAP = true;
                     //SI NO ARROJA RESULTADOS LA PRIMERA SENTENCIA, EJECUTA LA SENTENCIA ALTERNA REGISTRADA EN LA CONSULTA               
@@ -94,9 +97,9 @@ class GuardarInformacion extends Command
 
                                     //CREAMOS UN ARRAY APARTIR DEL RESULTADO DE CONDICIONES Y OBTENEMOS LA CANTIDAD DE RESULTADOS
                                     $arrayCondB = explode(',', $condicionRegistro[0]['condicion']); $totalCondRay = count($arrayCondB);
-                                    echo "------------------------------------------------------------------------------------------------<br>x";
+                                    echo "-----------------------------------<br>\n";
                                     echo "CONDICIONES: ".$totalCondRay."\n";
-                                    echo "<br>------------------------------------------------------------------------------------------------<br>\n";
+                                    echo "<br>-------------------------------<br>\n";
 
                                     //RECORREMOS DATOS REGISTRADOS PREVIAMENTE DE LA TABLA CONSULTADA
                                     foreach ($dataTableReg as $valueCond) {
@@ -113,7 +116,7 @@ class GuardarInformacion extends Command
 
                                         // RECORREMOS ARRAY PREVIAMENTE DECLARADO PARA GUARDAR CONDICIONES, DONDE SE GUARDO LA INFORMACION ESPECIFICA EXTRAIDA DE LA TABLA "X"
                                         foreach ($arrayCondicion as $keyCond => $valuKyCond) {
-                                            echo "<br>________________________________________________________________________________________________<br>\n";
+                                            // echo "<br>____________________________<br>\n";
                                             $valuKyCond = trim($valuKyCond); //ELIMINAMOS POSIBLES ESPACIOS EN BLANCO
 
                                             // VALIDAMOS SI EL CAMPO TIENE O 'NO' TIENE INFORMACION, SE BUSCA EN EL RESULTADO SOAP POSIBLES DATOS IGUALES AL DE LA CONDICIONES RECORRIDA, SUMA EN CASO TAL DE ENCONTRAR COINCIDENCIA A LA VARIABLE $suCond 
@@ -128,9 +131,10 @@ class GuardarInformacion extends Command
                                         //SI EL TOTAL EN LA SUMA DE CONDICIONES RECORRIDAS ES IGUAL A LA CANTIDAD DE CONDICIONES CONSULTADAS ENTONCES DECLARA COMO FALSE EL POSTERIOR REGISTRO DEL DATO A LA BASE DE DATOS
                                         if ($totalCondRay == $suCond) { $regCond = false; }
                                         
-                                        echo "<br>________________________________________________________________________________________________<br>\n";
-                                        echo "DATA FILA:"; print_r($arrayCondicion); echo " TIENE [".$suCond."] INTERSECCIONES";
-                                        echo "<br>________________________________________________________________________________________________<br>\n";
+                                        if ($consecutivoValue->tipo_documento == 'NCN') {
+                                            echo "TIENE [".$suCond."] INTERSECCIONES \n";
+                                        }
+                                       
 
                                     }                            
 
@@ -179,7 +183,7 @@ class GuardarInformacion extends Command
                         }else{
 
                             if ($busqueda_alterna == true) {      
-                                $stopWhile = 0; 
+                                $busqueda_alterna = false;  $stopWhile = 0; 
                             }else{ 
                                 $busqueda_alterna = true; 
                             }
@@ -187,9 +191,13 @@ class GuardarInformacion extends Command
                             echo "<br> DEFINIENDO BUCLE $stopWhile <br>\n";
 
                         }
-                    }else{ $stopWhile = 0;  }                                      
+                    }else{ 
+                        // if ($busqueda_alterna == true) {  $busqueda_alterna = false; }
+                        $stopWhile = 0;                          
+                    }                                      
 
                 }while($stopWhile != 0);
+
             }
 
             
