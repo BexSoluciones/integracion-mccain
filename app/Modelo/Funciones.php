@@ -358,7 +358,7 @@ class Funciones extends Model {
     }
 
     public static function caracterEspecial($val){
-        $char = str_replace(['\u00f1','\u00e1','\u00e9','\u00ed','\u00f3','\u00fa','\u00c1','\u00c9','\u00cd','\u00d3','\u00da','\u00d1'], ['ñ','á','é','í','ó','ú','Á','É','Í','Ó','Ú','Ñ'], $val);
+        $char = str_replace(['\u00f1','\u00e1','\u00e9','\u00ed','\u00f3','\u00fa','\u00c1','\u00c9','\u00cd','\u00d3','\u00da','\u00d1','&amp;'], ['ñ','á','é','í','ó','ú','Á','É','Í','Ó','Ú','Ñ','&'], $val);
         return $char;
     }
 

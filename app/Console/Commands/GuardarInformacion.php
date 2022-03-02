@@ -79,7 +79,7 @@ class GuardarInformacion extends Command
                             echo "<br>================= $value->tabla_destino ================================<br>\n"; 
                             
                             //CONSULTA LISTA DE CONDICIONES PARA VALIDACION Y PASAR A REGISTRO
-                            $condicionRegistro = ConsultaCondicion::where('id_consulta',$value->codigo)->get();  
+                            $condicionRegistro = ConsultaCondicion::where('id_consulta',$value->codigo)->first();  
 
                             //RECORRE RESULTADO DE DATOS ARROJADOS EN LA CONSULTA SOAP
                             foreach ($resultado as $resKey => $valres) {
@@ -89,54 +89,71 @@ class GuardarInformacion extends Command
                                 $regCond = true; //$reselect = null; 
 
                                 //VALIDA SI LA CONSULTA CUENTA CON CONDICIONES REGISTRADAS 
-                                if (count($condicionRegistro) > 0) {
+                                if (isset($condicionRegistro)) {
                                     
                                     echo "TABLA REGISTRO: ".count($dataTableReg);
                                     // print_r($dataTableReg);
                                     echo "<br>";
 
                                     //CREAMOS UN ARRAY APARTIR DEL RESULTADO DE CONDICIONES Y OBTENEMOS LA CANTIDAD DE RESULTADOS
-                                    $arrayCondB = explode(',', $condicionRegistro[0]['condicion']); $totalCondRay = count($arrayCondB);
+                                    $arrayCondB = explode(',', $condicionRegistro['condicion']); $totalCondRay = count($arrayCondB);
                                     echo "-----------------------------------<br>\n";
                                     echo "CONDICIONES: ".$totalCondRay."\n";
                                     echo "<br>-------------------------------<br>\n";
 
-                                    //RECORREMOS DATOS REGISTRADOS PREVIAMENTE DE LA TABLA CONSULTADA
-                                    foreach ($dataTableReg as $valueCond) {
+                                    $valueReSOAP = str_replace("'", "", $valres[$arrayCondB[0]]);
 
-                                        $arrayCondicion = array(); //DECLARACION DE ARRAY PARA GUARDAR RESULTADO DE LA CONSULTA DE CAMPO ESPECIFICO DECLARADO EN LA LISTA DE CONDICIONES
+                                    $consultaCampoCond = new Tabla; $consultaCampoCond->getTable(); $consultaCampoCond->bind($value->tabla_destino); 
+                                    $codigoCons = $consultaCampoCond->select('codigo')->where($arrayCondB[0],$valueReSOAP)->get(); 
 
-                                        //RECORRE LISTA DE CONDICIONES
-                                        foreach ($arrayCondB as $keyArrB => $valueArrB) {
-                                            $dataCond = trim($valueCond[$valueArrB]); //CONSULTA LA INFORMACION DE UN CAMPO PERTENECIENTE A LA TABLA "X" DEL CAMPO "Y" DE LA CONDICION RECORRIDA, ELIMINA ESPACIOS EN BLANCO
-                                            array_push($arrayCondicion, $dataCond); //GUARDA LA INFORMACION DEL CAMPO CONSULTADO Y GUARDA EN EL ARRAY ANTERIOMENTE DECLARADO
-                                        }
+                                    $coincidenciaCons = 0;
 
-                                        $suCond = 0; //DELCARACION DE VARIABLE PARA POSTERIOMENTE VALIDAR CUMPLIMIENTO DE CONDICION
+                                    if (count($codigoCons) > 0) {
+                                        foreach ($codigoCons as $keyCons => $valueConstable) {
 
-                                        // RECORREMOS ARRAY PREVIAMENTE DECLARADO PARA GUARDAR CONDICIONES, DONDE SE GUARDO LA INFORMACION ESPECIFICA EXTRAIDA DE LA TABLA "X"
-                                        foreach ($arrayCondicion as $keyCond => $valuKyCond) {
-                                            // echo "<br>____________________________<br>\n";
-                                            $valuKyCond = trim($valuKyCond); //ELIMINAMOS POSIBLES ESPACIOS EN BLANCO
+                                            $acumuladoCons = 1;
 
-                                            // VALIDAMOS SI EL CAMPO TIENE O 'NO' TIENE INFORMACION, SE BUSCA EN EL RESULTADO SOAP POSIBLES DATOS IGUALES AL DE LA CONDICIONES RECORRIDA, SUMA EN CASO TAL DE ENCONTRAR COINCIDENCIA A LA VARIABLE $suCond 
-                                            if ($valuKyCond == 'NO') {
-                                                $clave = array_search("NO", $valres); if ($clave != '') { $suCond++; } //
-                                            }else{
-                                                $clave = array_search("'".$valuKyCond."'", $valres); if ($clave != '') { $suCond++; }
+                                            for ($i=1; $i < count($arrayCondB); $i++) { 
+                                                if (isset($valres[$arrayCondB[$i]])) {
+                                                    
+                                                    $valueConsoap = str_replace("'", "", $valres[$arrayCondB[$i]]);
+                                                    
+                                                    // echo "============== CONSULTA [ $arrayCondB[$i] = $valueConsoap ] SE ENCONTRO EN LA CONSULTA SOAP <br> \n";
+                                                    
+                                                    $consultaCampoCondicion = new Tabla; $consultaCampoCondicion->getTable(); 
+                                                    $consultaCampoCondicion->bind($value->tabla_destino); 
+                                                    $resCons = $consultaCampoCondicion->select('codigo')->where('codigo',$valueConstable['codigo'])->where($arrayCondB[$i],$valueConsoap)->first();
+
+                                                    if (isset($resCons['codigo'])) { 
+                                                        echo "LA CONDICION [ $arrayCondB[$i] = $valueConsoap ] SE ENCONTRO EN LA CONSULTA EN LA BD [ ".$valueConstable['codigo']." ] <br> \n";
+                                                        $acumuladoCons++; 
+                                                    }else{
+                                                        echo "LA CONDICION [ $arrayCondB[$i] = $valueConsoap ] NO SE ENCONTRO EN LA CONSULTA EN LA BD [ ".$valueConstable['codigo']." ] <br> \n";
+                                                    }
+
+                                                }else{
+                                                    echo "LA CONDICION [ $arrayCondB[$i] ] NO SE ENCONTRO EN LA CONSULTA SOAP <br> \n";
+                                                }
+
                                             }
-                                            
-                                        }
 
-                                        //SI EL TOTAL EN LA SUMA DE CONDICIONES RECORRIDAS ES IGUAL A LA CANTIDAD DE CONDICIONES CONSULTADAS ENTONCES DECLARA COMO FALSE EL POSTERIOR REGISTRO DEL DATO A LA BASE DE DATOS
-                                        if ($totalCondRay == $suCond) { $regCond = false; }
-                                        
-                                        if ($consecutivoValue->tipo_documento == 'NCN') {
-                                            echo "TIENE [".$suCond."] INTERSECCIONES \n";
-                                        }
-                                       
+                                            if ($acumuladoCons == count($arrayCondB)){ $coincidenciaCons++; break; }
 
-                                    }                            
+                                            echo "\n";
+
+                                        }
+                                    }
+
+                                    echo "CONSULTANDO CONDICIONES CONSULTA SOAP <br> \n";                                    
+
+                                    if ($coincidenciaCons > 0){
+                                        echo "ESTE DATO [ ".$valueReSOAP." ] SE ENCUENTRA REGISTRADA EN LA TABLA [ $value->tabla_destino ], PASANDO AL SIGUIENTE RESULTADO <br> \n";
+                                        $regCond = false;
+                                    }else{
+                                        echo "ESTE DATO NO SE ENCUENTRA REGISTRADA EN LA TABLA [ $value->tabla_destino ] <br> \n";
+                                    }      
+
+                                    // dd($coincidenciaCons);
 
                                 }else{ 
                                     echo "NO TIENE CONDICIÓN <br>"; 
@@ -153,7 +170,8 @@ class GuardarInformacion extends Command
                                 // SI LA CONDICION PREVIA PARA REGISTRO ES TRUE
                                 if ($regCond == true) { 
                                     echo "DATA REGISTRADO"; // VALIDA NUEVAMENTE QUE EL ARRAY CON DATOS SOAP CUENTE CON DATOS Y REGISTRA EN LA TABLA CONSULTADA LA INFORMACION
-                                    if (count($datos) > 0) { $consTabla->insert($datos[$keyDat]); }                            
+                                    if (count($datos) > 0) { $consTabla->insert($datos[$keyDat]); }  
+                                    // dd($datos[$keyDat]);                          
                                 }else{ unset($datos[$keyDat]); } // DE LO CONTRARIO EL SISTEMA CONCLUYE QUE EL DATO YA ESTA REGISTRADO O NO ES APTO PARA EL REGISTRO, ELIMINA ESTE DATO DEL ARRAY SOAP
 
                                 $endArray = end($resultado); // CONSULTA EL ULTIMO REGISTRO DEL ARRAY SOAP

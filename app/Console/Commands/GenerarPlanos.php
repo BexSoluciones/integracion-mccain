@@ -66,7 +66,8 @@ class GenerarPlanos extends Command
                                         $tablaBuscar = Consulta::where('codigo',$planoFuncion->consulta)->first();
                                         $buscarTabla = new Tabla; $buscarTabla->getTable(); $buscarTabla->bind($tablaBuscar['tabla_destino']); $resBusc = $buscarTabla->where($planoFuncion->nombre,$valueB)->first();     
                                         if ($planoFuncion->tipo == 'texto') {
-                                            $dataPlan .= " ".$consPlano['entre_columna'].str_pad($resBusc['codigo'], $planoFuncion->longitud).$consPlano['entre_columna'].$consPlano['separador'];
+                                            $dataResplan = substr($resBusc['codigo'], 0, $planoFuncion->longitud);
+                                            $dataPlan .= " ".$consPlano['entre_columna'].str_pad($dataResplan, $planoFuncion->longitud).$consPlano['entre_columna'].$consPlano['separador'];
                                         }else{ $dataPlan .= $resBusc['codigo'].$consPlano['separador']; }
                                     }else{
                                         $dataPlan .= Funciones::condicionPlano($planoFuncion,$valueB,$name_us,$consPlano);
@@ -83,7 +84,8 @@ class GenerarPlanos extends Command
                                     if ($campoQuemado->posicion == $suma) {
                                         $campoDpl = false; // echo "$campoQuemado";
                                         if ($campoQuemado->tipo == 'texto') {
-                                            $dataPlan .= " ".$consPlano['entre_columna'].str_pad($campoQuemado->valor, $campoQuemado->longitud).$consPlano['entre_columna'].$consPlano['separador'];
+                                            $dataResplan = substr($campoQuemado->valor, 0, $campoQuemado->longitud);
+                                            $dataPlan .= " ".$consPlano['entre_columna'].str_pad($dataResplan, $campoQuemado->longitud).$consPlano['entre_columna'].$consPlano['separador'];
                                         }else{ $dataPlan .= $campoQuemado->valor.$consPlano['separador']; }
                                     }
                                 }
@@ -100,7 +102,8 @@ class GenerarPlanos extends Command
                                     $longitudR = Funciones::ReplaceText($longitud[$suma]);
                                     
                                     if ($tipoR == 'texto') {
-                                        $dataPlan .= "".$consPlano['entre_columna'].str_pad($valueB, $longitudR).$consPlano['entre_columna'].$consPlano['separador'];
+                                        $dataResplan = substr($valueB, 0, $longitudR);
+                                        $dataPlan .= "".$consPlano['entre_columna'].str_pad($dataResplan, $longitudR).$consPlano['entre_columna'].$consPlano['separador'];
                                     }else{ $dataPlan .= $valueB.$consPlano['separador']; }
 
                                 }   
