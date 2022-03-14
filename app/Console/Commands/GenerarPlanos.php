@@ -36,10 +36,15 @@ class GenerarPlanos extends Command
                 $resCons = $consTabla->where('planoRegistro',0)->groupBy($value->group_by)->orderBy($value->orderBy,$value->orderType)->get();
             }
 
-            $dataPlan = null; $name_us = null;
+            $dataPlan = null; $name_us = null; $sumR = 0;
             foreach ($resCons as $keya => $valueA) {                
-                $suma = 0; $array = explode(",", $valueA); 
-                if ($consPlano['display_codigo'] == 0) { $sum = 1; }else{ $sum = 2; }     
+
+                echo "===> DATA: $sumR  \n";
+
+                $suma = 0; $array = explode(",", $valueA); $totalExpl = count($array) - 2;
+                if ($consPlano['display_codigo'] == 0) { $sum = 1; }else{ $sum = 2; }    
+
+                // dd($totalExpl);
 
                 if (count($array) > 0) {
                     foreach ($array as $keyb => $valueB) {                  
@@ -49,12 +54,24 @@ class GenerarPlanos extends Command
                             $campoDpl = true; $pos = strpos($valueB, ':'); $pos++;
                             $valueB = substr($valueB, $pos); $valueB = Funciones::ReplaceText($valueB);
                 
-                            $tipo = explode(",", $consFormato['tipo']); $longitud = explode(",", $consFormato['longitud']); 
+                            $tipo = explode(",", $consFormato['tipo']); 
+                            $longitud = explode(",", $consFormato['longitud']); 
                             
-                            echo "VALUE FOREACH:".$valueB." | ".$suma." | "."\n";
+                            // echo "VALUE FOREACH:".$valueB." | ".$suma." | "."\n";
                             // echo "STATE A: $campoDpl <br>";
 
                             if ($valueB == 'NO') { $valueB = ''; }
+
+                            // echo "TOTAL: ".(count($tipo) - 2)." / SUMA: $sum / VAL: $valueB \n";
+                            // echo "SUMA: $sum \n";
+
+                            if (count($tipo) == $sum || count($tipo) < $sum) { 
+                                // echo "ESPACIADO NULL \n"; 
+                                $separadorPlan = ""; 
+                            }else{ 
+                                // echo "SEPARADO ; \n"; 
+                                $separadorPlan = $consPlano['separador']; 
+                            }                           
 
                             // CAMPOS CON FUNCIONES ESPECIFICAS
                             foreach ($consPlanoFuncion as $planoFuncion) {
@@ -67,8 +84,8 @@ class GenerarPlanos extends Command
                                         $buscarTabla = new Tabla; $buscarTabla->getTable(); $buscarTabla->bind($tablaBuscar['tabla_destino']); $resBusc = $buscarTabla->where($planoFuncion->nombre,$valueB)->first();     
                                         if ($planoFuncion->tipo == 'texto') {
                                             $dataResplan = substr($resBusc['codigo'], 0, $planoFuncion->longitud);
-                                            $dataPlan .= " ".$consPlano['entre_columna'].str_pad($dataResplan, $planoFuncion->longitud).$consPlano['entre_columna'].$consPlano['separador'];
-                                        }else{ $dataPlan .= $resBusc['codigo'].$consPlano['separador']; }
+                                            $dataPlan .= " ".$consPlano['entre_columna'].str_pad($dataResplan, $planoFuncion->longitud).$consPlano['entre_columna'].$separadorPlan;
+                                        }else{ $dataPlan .= $resBusc['codigo'].$separadorPlan; }
                                     }else{
                                         $dataPlan .= Funciones::condicionPlano($planoFuncion,$valueB,$name_us,$consPlano);
                                         if ($dataPlan != false) { $campoDpl = false; }
@@ -85,8 +102,8 @@ class GenerarPlanos extends Command
                                         $campoDpl = false; // echo "$campoQuemado";
                                         if ($campoQuemado->tipo == 'texto') {
                                             $dataResplan = substr($campoQuemado->valor, 0, $campoQuemado->longitud);
-                                            $dataPlan .= " ".$consPlano['entre_columna'].str_pad($dataResplan, $campoQuemado->longitud).$consPlano['entre_columna'].$consPlano['separador'];
-                                        }else{ $dataPlan .= $campoQuemado->valor.$consPlano['separador']; }
+                                            $dataPlan .= " ".$consPlano['entre_columna'].str_pad($dataResplan, $campoQuemado->longitud).$consPlano['entre_columna'].$separadorPlan;
+                                        }else{ $dataPlan .= $campoQuemado->valor.$separadorPlan; }
                                     }
                                 }
                             }
@@ -103,8 +120,8 @@ class GenerarPlanos extends Command
                                     
                                     if ($tipoR == 'texto') {
                                         $dataResplan = substr($valueB, 0, $longitudR);
-                                        $dataPlan .= "".$consPlano['entre_columna'].str_pad($dataResplan, $longitudR).$consPlano['entre_columna'].$consPlano['separador'];
-                                    }else{ $dataPlan .= $valueB.$consPlano['separador']; }
+                                        $dataPlan .= "".$consPlano['entre_columna'].str_pad($dataResplan, 0).$consPlano['entre_columna'].$separadorPlan;
+                                    }else{ $dataPlan .= $valueB.$separadorPlan; }
 
                                 }   
                             }
@@ -113,9 +130,11 @@ class GenerarPlanos extends Command
                         } $sum++; $suma++;
                     }
                     // echo "<br>";
-                    // echo "PLANO ANT FUNCTION: $dataPlan <br>";
+                    // echo "PLANO ANT FUNCTION: $dataPlan \n";
+                    // echo "\n";
+
                     if ($consPlano['salto_linea'] == 1) { $dataPlan .= "\n"; }
-                }   
+                }   $sumR++;
 
             }
 
