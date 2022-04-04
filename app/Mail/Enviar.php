@@ -17,8 +17,8 @@ class Enviar extends Mailable
     public function build()
     {
     	$correo = $this->view('correo.plano')->subject("Philip Morris International Coltabaco"); 
-    	// $ruta = '/var/www/html/integracion-coltabaco/public/plano';
-    	$ruta = 'public/plano';
+    	$ruta = '/var/www/html/integracion-coltabaco/public/plano';
+    	// $ruta = 'public/plano';
 
 	    if (is_dir($ruta)){
 	        $gestor = opendir($ruta);

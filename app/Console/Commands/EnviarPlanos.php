@@ -21,11 +21,11 @@ class EnviarPlanos extends Command
         $list = Correo::where('estado',1)->get(); 
         foreach ($list as $data) { $email = new Enviar(); Mail::to($data['correo'])->send($email); }
 
-     //    $ruta = '/var/www/html/integracion-coltabaco/public/plano';
-    	// $ruta_enviado = '/var/www/html/integracion-coltabaco/public/plano_enviado';
+        $ruta = '/var/www/html/integracion-coltabaco/public/plano';
+    	$ruta_enviado = '/var/www/html/integracion-coltabaco/public/plano_enviado';
 
-        $ruta = 'public/plano';
-        $ruta_enviado = 'public/plano_enviado';
+        // $ruta = 'public/plano';
+        // $ruta_enviado = 'public/plano_enviado';
     	
         if (is_dir($ruta)){
 	        $gestor = opendir($ruta);
@@ -34,9 +34,13 @@ class EnviarPlanos extends Command
 	            $ruta_completa_nueva = $ruta_enviado . "/" . $archivo;
 	            if ($archivo != "." && $archivo != "..") {
 	                rename($ruta_completa, $ruta_completa_nueva);
-	            }
+	            }else{
+                    echo "NO SE ENCONTRO ARCHIVOS \n";
+                }
 	        }
 	        closedir($gestor);
-	    }
+	    }else{
+            echo "NO SE ENCONTRO LA RUTA \n";
+        }
     }
 }
