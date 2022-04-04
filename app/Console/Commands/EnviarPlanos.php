@@ -30,6 +30,7 @@ class EnviarPlanos extends Command
         if (is_dir($ruta)){
 	        $gestor = opendir($ruta);
 	        while (($archivo = readdir($gestor)) !== false)  {	                
+                echo "ARCHIVO: ".$archivo." \n";
 	            $ruta_completa = $ruta . "/" . $archivo;
 	            $ruta_completa_nueva = $ruta_enviado . "/" . $archivo;
 	            if ($archivo != "." && $archivo != "..") {

@@ -26,11 +26,13 @@ class Enviar extends Mailable
 	            $ruta_completa = $ruta . "/" . $archivo;
 	            if ($archivo != "." && $archivo != "..") {
 	                if (is_dir($ruta_completa)) {  self::obtenerArchivos($ruta_completa);  }else{  $correo->attach($ruta_completa);  }
+	            }else{
+	            	echo "ARCHIVO B: ".$archivo." \n";
 	            }
 	        }
 	        closedir($gestor);
 	    } else {
-	        return "No es una ruta de directorio valida<br/>";
+	        return "No es una ruta de directorio valida <br/> \n";
 	    }
 
         return $correo;
