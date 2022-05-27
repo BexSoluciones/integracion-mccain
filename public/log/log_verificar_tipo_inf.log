@@ -1,0 +1,26 @@
+<br>================= Consecutivo para tipo de documentos ================================<br>
+El tipo documento = FCP , ya se encuentra registrado en la consulta tabla = tbl_ws_cliente 
+El tipo documento = FEC , ya se encuentra registrado en la consulta tabla = tbl_ws_cliente 
+El tipo documento = FPC , ya se encuentra registrado en la consulta tabla = tbl_ws_cliente 
+El tipo documento = NCE , ya se encuentra registrado en la consulta tabla = tbl_ws_cliente 
+El tipo documento = NCN , ya se encuentra registrado en la consulta tabla = tbl_ws_cliente 
+El tipo documento = FCP , ya se encuentra registrado en la consulta tabla = tbl_ws_detalle_venta 
+El tipo documento = FEC , ya se encuentra registrado en la consulta tabla = tbl_ws_detalle_venta 
+El tipo documento = FPC , ya se encuentra registrado en la consulta tabla = tbl_ws_detalle_venta 
+El tipo documento = NCE , ya se encuentra registrado en la consulta tabla = tbl_ws_detalle_venta 
+El tipo documento = NCN , ya se encuentra registrado en la consulta tabla = tbl_ws_detalle_venta 
+El tipo documento = FCP , ya se encuentra registrado en la consulta tabla = tbl_ws_total_facturado 
+El tipo documento = FEC , ya se encuentra registrado en la consulta tabla = tbl_ws_total_facturado 
+El tipo documento = FPC , ya se encuentra registrado en la consulta tabla = tbl_ws_total_facturado 
+El tipo documento = NCE , ya se encuentra registrado en la consulta tabla = tbl_ws_total_facturado 
+El tipo documento = NCN , ya se encuentra registrado en la consulta tabla = tbl_ws_total_facturado 
+El tipo documento = FCP , ya se encuentra registrado en la consulta tabla = tbl_ws_vendedor 
+El tipo documento = FEC , ya se encuentra registrado en la consulta tabla = tbl_ws_vendedor 
+El tipo documento = FPC , ya se encuentra registrado en la consulta tabla = tbl_ws_vendedor 
+El tipo documento = NCE , ya se encuentra registrado en la consulta tabla = tbl_ws_vendedor 
+El tipo documento = NCN , ya se encuentra registrado en la consulta tabla = tbl_ws_vendedor 
+El tipo documento = FCP , ya se encuentra registrado en la consulta tabla = tbl_ws_inventario 
+El tipo documento = FEC , ya se encuentra registrado en la consulta tabla = tbl_ws_inventario 
+El tipo documento = FPC , ya se encuentra registrado en la consulta tabla = tbl_ws_inventario 
+El tipo documento = NCE , ya se encuentra registrado en la consulta tabla = tbl_ws_inventario 
+El tipo documento = NCN , ya se encuentra registrado en la consulta tabla = tbl_ws_inventario 

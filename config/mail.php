@@ -1,6 +1,7 @@
 <?php
 
-$mail_from_name = "Concesionario 00210 | fecha `".date('Y-m-d')."`"; 
+// $mail_from_name = "Concesionario 00210 | fecha `".date('Y-m-d')."`"; 
+$mail_from_name = "Concesionario 00210"; 
 
 return [
 
@@ -38,7 +39,7 @@ return [
     'mailers' => [
         'smtp' => [
             'transport' => 'smtp',
-            'host' => env('MAIL_HOST', 'smtp.mailgun.org'),
+            'host' => env('MAIL_HOST', 'smtp.sendgrid.net'),
             'port' => env('MAIL_PORT', 587),
             'encryption' => env('MAIL_ENCRYPTION', 'tls'),
             'username' => env('MAIL_USERNAME'),
@@ -87,7 +88,8 @@ return [
 
     'from' => [
         'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-        'name' => "Concesionario 00210 | fecha `".date('Y-m-d')."`",
+        // 'name' => "Concesionario 00210 | fecha `".date('Y-m-d')."`",
+        'name' => "Concesionario 00210",
     ],
 
     /*

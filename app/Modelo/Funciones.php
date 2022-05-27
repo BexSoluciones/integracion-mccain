@@ -346,6 +346,9 @@ class Funciones extends Model {
             $sentencia = str_replace('@conseItem', $consecutivoDat->consecutivo_b, $sentencia);
         }
 
+        $sentencia = str_replace('@fechaInicio', $consulta->fechaInicio, $sentencia);
+        $sentencia = str_replace('@fechaFin', $consulta->fechaFin, $sentencia);
+
         $sentencia = str_replace('@top', $top, $sentencia);
         $sentencia = str_replace('@desdeItems', $consulta->desde_items, $sentencia);
         $sentencia = str_replace('@idPlan', $consulta->id_plan, $sentencia);
