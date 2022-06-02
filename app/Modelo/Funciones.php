@@ -146,7 +146,11 @@ class Funciones extends Model {
         }else if ($campo == 'AA') {
             $camp = date('Y');
         }else if ($campo == 'SS') {
-            $camp = date('Y-m-d'); $camp = self::weekOfMonth($camp);
+            $camp = date('Y-m-d'); 
+            $camp = self::weekOfMonth($camp);
+            if ($camp > 5) {
+                $camp = 5;
+            }
         }
 
         if (strlen($camp) < 2) { $camp = "0".$camp; }
