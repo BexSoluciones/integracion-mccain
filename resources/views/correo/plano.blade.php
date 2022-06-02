@@ -11,7 +11,6 @@
 </h2>
 </center>
   
-<p>Generación de planos mes 'Enero de 2022'</p>
   
 <strong>Este mensaje es generado automaticamente, no responder a este mensaje.</strong>
   
