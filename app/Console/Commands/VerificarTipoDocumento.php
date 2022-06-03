@@ -32,6 +32,12 @@ class VerificarTipoDocumento extends Command
         if (count($listaConsultaTipoTablas) > 0) {
             foreach ($listaConsultaTipoTablas as $value) {
 
+                // VERIFICA SI TRUNCATE ESTA ACTIVADO EN LA CONFIG DE CONSULTA
+                if ($value->truncate == '1') { 
+                    $consTabla = new Tabla; $consTabla->getTable(); $consTabla->bind($value->tabla_destino); 
+                    $consTabla->truncate();  // BORRA REGISTROS PREVIOS DE TABLA CONSULTADA
+                }
+
                 $sentencia = Funciones::ParametroSentencia($value,$dataConexion,false,$busqueda_alterna,null);
                 $xml = Funciones::consultaStructuraXML($dataConexion->conexion,$dataConexion->cia,$dataConexion->proveedor,$dataConexion->usuario,$dataConexion->clave,$sentencia,$dataConexion->consulta,1,0);
                 $resultado = Funciones::SOAP($dataConexion->url, $xml, $value->tabla_destino);
