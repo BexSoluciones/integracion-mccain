@@ -157,6 +157,14 @@ class Funciones extends Model {
 
         return $camp;
     }
+
+    public static function fechaConsulta($type){
+        if ($type == "inicio") {
+            return date("Y")."-".date("m")."-01";
+        }else{
+            return date("Y-m-d");
+        }
+    }
     
     public static function weekOfMonth($date) {
         //Get the first day of the month.
