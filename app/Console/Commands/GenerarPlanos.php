@@ -51,6 +51,7 @@ class GenerarPlanos extends Command
                         if ($sum != 1) {
 
                             $valueB = Funciones::caracterEspecial($valueB);
+                            $valueB = Funciones::caracterEspecialSimbol($valueB);
                             $campoDpl = true; $pos = strpos($valueB, ':'); $pos++;
                             $valueB = substr($valueB, $pos); $valueB = Funciones::ReplaceText($valueB);
                 

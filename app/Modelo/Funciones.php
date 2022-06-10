@@ -377,6 +377,11 @@ class Funciones extends Model {
         return $char;
     }
 
+    public static function caracterEspecialSimbol($val){
+        $char = str_replace(['ñ','Ñ',"'",'?','/','*','¡','¿','[',']','{','}','^','¬','|','°','!','"','$','%','&','(',')','=',',','.','-','_','>','<','@'], ['n','N',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ']);
+        return $char;
+    }
+
     public static function condicionPlano($planoFuncion,$valueB,$name_us,$consPlano){
         
         $nombreDia = self::nombreDia($valueB); 
