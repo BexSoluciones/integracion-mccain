@@ -29,7 +29,7 @@ class GuardarInformacion extends Command
             echo "<br>##################### $value->tabla_destino ####################################<br>\n";
 
             //CONSULTA LISTA DE CONSECUTIVOS QUE TIENE LA CONSULTA QUE ESTA RECORRIENDO
-            ConsultaConsecutivo::where('consulta',$value->codigo)->where('consecutivo_b','>',0)->update(['consecutivo_b' => 1]);
+            ConsultaConsecutivo::where('codigo','>',0)->update(['consecutivo' => 1, 'consecutivo_b' => 1]);
             $consecutivosTabla = ConsultaConsecutivo::where('consulta',$value->codigo)->get();
 
             $consTabla = new Tabla; $consTabla->getTable(); $consTabla->bind($value->tabla_destino); 
