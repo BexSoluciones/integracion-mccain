@@ -36,7 +36,9 @@ class GenerarPlanos extends Command
                 $resCons = $consTabla->where('planoRegistro',0)->groupBy($value->group_by)->orderBy($value->orderBy,$value->orderType)->get();
             }
 
-            $totalSuc = array('00210','00211','00212'); $dataPlan = null; $name_us = null; $sumR = 0;
+            $totalSuc = array('00210','00211'); 
+            // $totalSuc = array('00210','00211','00212'); 
+            $dataPlan = null; $name_us = null; $sumR = 0;
 
             foreach ($totalSuc as $planSuc) {
 
@@ -154,8 +156,8 @@ class GenerarPlanos extends Command
                             $nombreFile = str_replace($subsName, $planSuc, $nombreFile);
                             echo "=> 00211 NAME: ".$nombreFile." \n";
                         }else{
-                            $nombreFile = str_replace($subsName, $planSuc, $nombreFile);
-                            echo "=> 00212 NAME: ".$nombreFile." \n";
+                            // $nombreFile = str_replace($subsName, $planSuc, $nombreFile);
+                            // echo "=> 00212 NAME: ".$nombreFile." \n";
                         }
                     }
 

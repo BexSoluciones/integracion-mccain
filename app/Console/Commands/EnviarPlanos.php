@@ -20,7 +20,8 @@ class EnviarPlanos extends Command
     {
         $list = Correo::where('estado',1)->get(); 
         
-        $totalSuc = array('00210','00211','00212');        
+        $totalSuc = array('00210','00211');        
+        // $totalSuc = array('00210','00211','00212');        
 
         foreach ($list as $data) { 
             foreach ($totalSuc as $totValue) {
