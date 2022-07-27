@@ -10,13 +10,13 @@ use Illuminate\Queue\SerializesModels;
 class Enviar extends Mailable
 {
     use Queueable, SerializesModels;
-    public function __construct(){
-        //
+    public function __construct($sucursal){
+        $this->sucursal = $sucursal;
     }
 
     public function build()
     {
-    	$correo = $this->view('correo.plano')->subject("Philip Morris International Coltabaco"); 
+    	$correo = $this->view('correo.plano')->subject("Concesionario ".$this->sucursal." | Philip Morris International Coltabaco"); 
     	$ruta = '/var/www/html/integracion-coltabaco/public/plano';
     	// $ruta = 'public/plano';
 
@@ -25,7 +25,14 @@ class Enviar extends Mailable
 	        while (($archivo = readdir($gestor)) !== false)  {	                
 	            $ruta_completa = $ruta . "/" . $archivo;
 	            if ($archivo != "." && $archivo != "..") {
-	                if (is_dir($ruta_completa)) {  self::obtenerArchivos($ruta_completa);  }else{  $correo->attach($ruta_completa);  }
+	            	$pos = strpos($archivo, $this->sucursal);
+	            	// dd($pos);
+	            	if ($pos === false) {
+	            		echo "El archico '$archivo' no fue encontrada en la sucursal ".$this->sucursal."\n";
+	            	}else{
+	            		echo "El archico '$archivo' fue encontrada en la sucursal ".$this->sucursal." y existe en la posición $pos \n";
+    					if (is_dir($ruta_completa)) {  self::obtenerArchivos($ruta_completa);  }else{  $correo->attach($ruta_completa);  }
+	            	}
 	            }else{
 	            	echo "ARCHIVO B: ".$archivo." \n";
 	            }

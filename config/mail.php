@@ -1,8 +1,5 @@
 <?php
 
-// $mail_from_name = "Concesionario 00210 | fecha `".date('Y-m-d')."`"; 
-$mail_from_name = "Concesionario 00210"; 
-
 return [
 
     /*
@@ -88,8 +85,8 @@ return [
 
     'from' => [
         'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-        // 'name' => "Concesionario 00210 | fecha `".date('Y-m-d')."`",
-        'name' => "Concesionario 00210",
+        'name' => NULL,
+        // 'name' => "Concesionario 00210",
     ],
 
     /*

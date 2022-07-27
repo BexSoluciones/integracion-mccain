@@ -19,7 +19,17 @@ class EnviarPlanos extends Command
     public function handle()
     {
         $list = Correo::where('estado',1)->get(); 
-        foreach ($list as $data) { $email = new Enviar(); Mail::to($data['correo'])->send($email); }
+        
+        $totalSuc = array('00210','00211','00212');        
+
+        foreach ($list as $data) { 
+            foreach ($totalSuc as $totValue) {
+                $name = "Concesionario ".$totValue; $to = [['email' => $data['correo'], 'name' => $name,]];
+                $email = new Enviar($totValue); Mail::to($to)->send($email); 
+            }
+        }
+
+        // dd("parar");
 
         $ruta = '/var/www/html/integracion-coltabaco/public/plano';
     	$ruta_enviado = '/var/www/html/integracion-coltabaco/public/plano_enviado';
