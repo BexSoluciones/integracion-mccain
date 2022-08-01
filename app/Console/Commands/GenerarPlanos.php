@@ -36,7 +36,8 @@ class GenerarPlanos extends Command
                 $resCons = $consTabla->where('planoRegistro',0)->groupBy($value->group_by)->orderBy($value->orderBy,$value->orderType)->get();
             }
 
-            $totalSuc = array('00210','00211'); 
+            $totalSuc = array('00210'); 
+            // $totalSuc = array('00210','00211'); 
             // $totalSuc = array('00210','00211','00212'); 
             $dataPlan = null; $name_us = null; $sumR = 0;
 
