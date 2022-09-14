@@ -229,6 +229,11 @@ class Funciones extends Model {
         return $fecha;
     }
 
+    public static function caracterEspecialSimbolB($val){
+        $char = str_replace(['ñ','Ñ',"'",'?','*','¡','¿','[',']','{','}','^','¬','|','°','!','"','$','%','&','(',')','=',',','_','>','<','@'], ['n','N',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '], $val);
+        return $char;
+    }
+
     public static function diaSemana($dia) {
         if ($dia == 'Lunes') {
             return "1";
@@ -378,8 +383,8 @@ class Funciones extends Model {
     }
 
     public static function caracterEspecialSimbol($val){
-        $char = str_replace(['ñ','Ñ',"'",'?','/','*','¡','¿','[',']','{','}','^','¬','|','°','!','"','$','%','&','(',')','=',',','.','-','_','>','<','@'], ['n','N',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '], $val);
-        return $char;
+        $char = str_replace(['ñ','Ñ',"'",'?','/','*','¡','¿','[',']','{','}','^','¬','|','°','!','"','$','%','&','(',')','=',',','_','>','<','@'], ['n','N',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '], $val);
+        return $char; 
     }
 
     public static function condicionPlano($planoFuncion,$valueB,$name_us,$consPlano){

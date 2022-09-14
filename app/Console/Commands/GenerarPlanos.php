@@ -58,8 +58,15 @@ class GenerarPlanos extends Command
                         foreach ($array as $keyb => $valueB) {                  
                             if ($sum != 1) {
 
-                                $valueB = Funciones::caracterEspecial($valueB);
-                                $valueB = Funciones::caracterEspecialSimbol($valueB);
+				$valueB = Funciones::caracterEspecial($valueB);
+                                if ($value->tabla_destino == "tbl_ws_total_facturado") {
+                                    $valueB = str_replace('--','/',$valueB);
+                                    $valueB = Funciones::caracterEspecialSimbolB($valueB);
+                                }else{
+                                    $valueB = Funciones::caracterEspecialSimbol($valueB);
+                                }
+
+
                                 $campoDpl = true; $pos = strpos($valueB, ':'); $pos++;
                                 $valueB = substr($valueB, $pos); $valueB = Funciones::ReplaceText($valueB);
                     
@@ -94,7 +101,7 @@ class GenerarPlanos extends Command
                                             if ($planoFuncion->tipo == 'texto') {
                                                 $dataResplan = substr($resBusc['codigo'], 0, $planoFuncion->longitud);
                                                 $dataPlan .= " ".$consPlano['entre_columna'].str_pad($dataResplan, $planoFuncion->longitud).$consPlano['entre_columna'].$separadorPlan;
-                                            }else{ $dataPlan .= $resBusc['codigo'].$separadorPlan; }
+                                            }else{ $dataPlan = str_replace(" ", "", $resBusc['codigo']);  $dataPlan .= $resBusc['codigo'].$separadorPlan; }
                                         }else{
                                             $dataPlan .= Funciones::condicionPlano($planoFuncion,$valueB,$name_us,$consPlano);
                                             if ($dataPlan != false) { $campoDpl = false; }
@@ -112,7 +119,7 @@ class GenerarPlanos extends Command
                                             if ($campoQuemado->tipo == 'texto') {
                                                 $dataResplan = substr($campoQuemado->valor, 0, $campoQuemado->longitud);
                                                 $dataPlan .= " ".$consPlano['entre_columna'].str_pad($dataResplan, $campoQuemado->longitud).$consPlano['entre_columna'].$separadorPlan;
-                                            }else{ $dataPlan .= $campoQuemado->valor.$separadorPlan; }
+                                            }else{ $campoQuemado->valor = str_replace(" ", "", $campoQuemado->valor);  $dataPlan .= $campoQuemado->valor.$separadorPlan; }
                                         }
                                     }
                                 }
@@ -130,7 +137,7 @@ class GenerarPlanos extends Command
                                         if ($tipoR == 'texto') {
                                             $dataResplan = substr($valueB, 0, $longitudR);
                                             $dataPlan .= "".$consPlano['entre_columna'].str_pad($dataResplan, 0).$consPlano['entre_columna'].$separadorPlan;
-                                        }else{ $dataPlan .= $valueB.$separadorPlan; }
+                                        }else{ $valueB = str_replace(" ", "", $valueB);  $dataPlan .= $valueB.$separadorPlan; }
 
                                     }   
                                 }
@@ -157,13 +164,14 @@ class GenerarPlanos extends Command
                             $nombreFile = str_replace($subsName, $planSuc, $nombreFile);
                             echo "=> 00211 NAME: ".$nombreFile." \n";
                         }else{
-                            // $nombreFile = str_replace($subsName, $planSuc, $nombreFile);
-                            // echo "=> 00212 NAME: ".$nombreFile." \n";
+                            //$nombreFile = str_replace($subsName, $planSuc, $nombreFile);
+                            //echo "=> 00212 NAME: ".$nombreFile." \n";
                         }
                     }
 
                     //$rutaFile = "public/plano/".$nombreFile; 
-                    $rutaFile = $consPlano['ruta'].$nombreFile; $dataPlan = str_replace('\/',"/", $dataPlan);
+                    $rutaFile = $consPlano['ruta'].$nombreFile;
+	            // $dataPlan = str_replace('-',"/", $dataPlan);
                     Funciones::crearTXT($dataPlan,$rutaFile,$nombreFile,$consPlano['ftp'],$consPlano['sftp']);
                 } 
             }
