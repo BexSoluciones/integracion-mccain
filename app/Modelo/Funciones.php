@@ -10,11 +10,11 @@ use Illuminate\Support\Facades\Storage;
 use App\Modelo\Tabla;
 use App\Modelo\LogTable;
 
-class Funciones extends Model {   
+class Funciones extends Model {
 
     public static function TrimVal($val){ return trim($val); }
 
-    public static function TrimArray($array){ 
+    public static function TrimArray($array){
         $expl = explode(',', $array); $dataRay = array();
         foreach ($expl as $key => $value) {
             $val = str_replace([' ','"'], '', $value); $resVal = trim($val);
@@ -28,9 +28,9 @@ class Funciones extends Model {
     }
 
     public static function deglosarNombre($nombre,$position){
-        $name = str_replace("  ", " ", $nombre); 
-        $nameEXPLODE = explode(" ", $name); 
-        
+        $name = str_replace("  ", " ", $nombre);
+        $nameEXPLODE = explode(" ", $name);
+
         if (count($nameEXPLODE) == 1) {
             if ($position == 1) { return trim($nameEXPLODE[0]); }else{ return ""; }
         }else if (count($nameEXPLODE) == 2) {
@@ -43,7 +43,7 @@ class Funciones extends Model {
 
     }
 
-    public static function convertirObjetosArrays($objetos){       
+    public static function convertirObjetosArrays($objetos){
         $arrayValues = [];  $acumValues = 0;
         foreach ($objetos as $key => $objeto) {
             $arrayValuesRow = [];
@@ -69,30 +69,30 @@ class Funciones extends Model {
                 foreach ($objetos as $keyb => $objeto) {
                     $srhColumn = false;
                     foreach ($objeto as $keyc => $valores) {
-                        if ($column == $keyc) { 
+                        if ($column == $keyc) {
                             $srhColumn = true; $value = ltrim($valores); $value = rtrim($valores);
                             if ($value != '') {
                                 $data[$sum][$column] = htmlspecialchars($value);
                             }else{
-                                $data[$sum][$column] = "NO"; 
+                                $data[$sum][$column] = "NO";
                             }
-                        }                  
+                        }
                     }
                     if ($srhColumn == false) { $data[$sum][$column] = "NO"; }
                     $sum++;
-                } 
+                }
             }
-        }  
+        }
         return $data;
     }
 
     public static function NombreArchivo($consPlano){
-        
+
         $name = NULL;
-        
+
         if ($consPlano['seccion_a'] != '') {
             $name .= self::RutaDate($consPlano['seccion_a']);
-        }else if($consPlano['seccion_campo_a'] != ''){            
+        }else if($consPlano['seccion_campo_a'] != ''){
             $consPlan = $consPlano['seccion_campo_a'];
             $consTabla = new Tabla; $consTabla->getTable(); $consTabla->bind($consPlan[0]); $resCons = $consTabla->select($consPlan[1])->first();
             $name .= $consTabla[$consPlan[1]];
@@ -100,7 +100,7 @@ class Funciones extends Model {
 
         if ($consPlano['seccion_b'] != '') {
             $name .= self::RutaDate($consPlano['seccion_b']);
-        }else if($consPlano['seccion_campo_b'] != ''){            
+        }else if($consPlano['seccion_campo_b'] != ''){
             $consPlan = $consPlano['seccion_campo_b'];
             $consTabla = new Tabla; $consTabla->getTable(); $consTabla->bind($consPlan[0]); $resCons = $consTabla->select($consPlan[1])->first();
             $name .= $consTabla[$consPlan[1]];
@@ -108,7 +108,7 @@ class Funciones extends Model {
 
         if ($consPlano['seccion_c'] != '') {
             $name .= self::RutaDate($consPlano['seccion_c']);
-        }else if($consPlano['seccion_campo_c'] != ''){            
+        }else if($consPlano['seccion_campo_c'] != ''){
             $consPlan = $consPlano['seccion_campo_c'];
             $consTabla = new Tabla; $consTabla->getTable(); $consTabla->bind($consPlan[0]); $resCons = $consTabla->select($consPlan[1])->first();
             $name .= $consTabla[$consPlan[1]];
@@ -116,7 +116,7 @@ class Funciones extends Model {
 
         if ($consPlano['seccion_d'] != '') {
             $name .= self::RutaDate($consPlano['seccion_d']);
-        }else if($consPlano['seccion_campo_d'] != ''){            
+        }else if($consPlano['seccion_campo_d'] != ''){
             $consPlan = $consPlano['seccion_campo_d'];
             $consTabla = new Tabla; $consTabla->getTable(); $consTabla->bind($consPlan[0]); $resCons = $consTabla->select($consPlan[1])->first();
             $name .= $consTabla[$consPlan[1]];
@@ -134,7 +134,7 @@ class Funciones extends Model {
     }
 
     public static function RutaDate($campo){
-        
+
         $camp = $campo;
 
         if ($campo == 'DD') {
@@ -146,7 +146,7 @@ class Funciones extends Model {
         }else if ($campo == 'AA') {
             $camp = date('Y');
         }else if ($campo == 'SS') {
-            $camp = date('Y-m-d'); 
+            $camp = date('Y-m-d');
             $camp = self::weekOfMonth($camp);
             if ($camp > 5) {
                 $camp = 5;
@@ -165,7 +165,7 @@ class Funciones extends Model {
             return date("Y-m-d");
         }
     }
-    
+
     public static function weekOfMonth($date) {
         //Get the first day of the month.
         $date = strtotime($date);
@@ -191,33 +191,33 @@ class Funciones extends Model {
     }
 
     public static function crearTXT($plano,$ruta,$nombreFile,$ftp,$sftp){
-        
+
         if (!empty($plano)) {
 
-            if (file_exists($ruta)){ 
+            if (file_exists($ruta)){
                 $archivo = fopen($ruta, "a+"); fwrite($archivo, $plano); fclose($archivo);
             }else{
                 $archivo = fopen($ruta, "w+"); fwrite($archivo, $plano); fclose($archivo);
-            } 
+            }
 
             if ($ftp === 1) {
-                $exist = Storage::disk('ftp')->exists($nombreFile); 
+                $exist = Storage::disk('ftp')->exists($nombreFile);
                 if (!empty($exist)) {
                     $dataPlan = Storage::disk('ftp')->get($nombreFile); $dataPlan .= $plano;
-                    Storage::disk('ftp')->put($nombreFile, $dataPlan); 
+                    Storage::disk('ftp')->put($nombreFile, $dataPlan);
                 }else{
-                    Storage::disk('ftp')->put($nombreFile, $plano); 
+                    Storage::disk('ftp')->put($nombreFile, $plano);
                 }
             }
 
-            if ($sftp === 1) { 
+            if ($sftp === 1) {
                 $existB = Storage::disk('sftp')->exists($nombreFile);
                 if (!empty($existsB)) {
                     $dataPlanB = Storage::disk('sftp')->get($nombreFile); $dataPlanB .= $plano;
-                    Storage::disk('sftp')->put($nombreFile, $dataPlanB); 
+                    Storage::disk('sftp')->put($nombreFile, $dataPlanB);
                 }else{
                     Storage::disk('sftp')->put($nombreFile, $plano);
-                }                 
+                }
             }
         }
 
@@ -225,7 +225,7 @@ class Funciones extends Model {
 
     public static function nombreDia($fecha) {
         $dias = array('Domingo','Lunes','Martes','Miercoles','Jueves','Viernes','Sabado');
-        $fecha = $dias[date('N', strtotime('2022-02-05'))]; 
+        $fecha = $dias[date('N', strtotime('2022-02-05'))];
         return $fecha;
     }
 
@@ -273,15 +273,15 @@ class Funciones extends Model {
     // CREA UNA ESTRUCTURA XML CON LOS DATOS DE CONEXION Y CONSULTA DE LA BD PARA REALIZAR CIERTA CONSULTA
     public static function consultaStructuraXML($empresa,$cia,$proveedor,$usuario,$clave,$sentencia,$idConsulta,$printError,$cacheWSDL){
         $parm['printTipoError'] = $printError;
-        $parm['cache_wsdl'] = $cacheWSDL;        
+        $parm['cache_wsdl'] = $cacheWSDL;
         $parm['pvstrxmlParametros'] = "<Consulta>
-                                            <NombreConexion>" . $empresa . "</NombreConexion>  
+                                            <NombreConexion>" . $empresa . "</NombreConexion>
                                             <IdCia>" . $cia . "</IdCia>
                                             <IdProveedor>" . $proveedor . "</IdProveedor>
                                             <IdConsulta>" . $idConsulta . "</IdConsulta>
-                                            <Usuario>" . $usuario . "</Usuario> 
+                                            <Usuario>" . $usuario . "</Usuario>
                                             <Clave>" . $clave . "</Clave>
-                                            <Parametros> 
+                                            <Parametros>
                                                 <Sql>".$sentencia."</Sql>
                                             </Parametros>
                                         </Consulta>";
@@ -294,8 +294,16 @@ class Funciones extends Model {
         do{
             try {
                 $client = new \SoapClient($url, $parametro);
-                $result = $client->EjecutarConsultaXML($parametro)->EjecutarConsultaXMLResult->any; $any = simplexml_load_string($result);
-                if (@is_object($any->NewDataSet->Resultado)) { return Funciones::convertirObjetosArrays($any->NewDataSet->Resultado); }else{ $terminar = 0; }
+                $result = $client->EjecutarConsultaXML($parametro)->EjecutarConsultaXMLResult->any;
+                $any = simplexml_load_string($result);
+                if (@is_object($any->NewDataSet->Resultado))
+                {
+                    return Funciones::convertirObjetosArrays($any->NewDataSet->Resultado);
+                }
+                else
+                {
+                    $terminar = 0;
+                }
 
                 if (@$any->NewDataSet->Table) {
                     foreach ($any->NewDataSet->Table as $key => $value) {
@@ -304,15 +312,23 @@ class Funciones extends Model {
                         echo ("\n Error Value:\t " . $value->F_VALOR);
                         echo ("\n Error Desc:\t " . $value->F_DETALLE);
                     }
-                }  
-            }catch (\Exception $e){
-            
-                $error = self::errorSOAP($e->getMessage());
-                if ($error == true) {
-                    $reg = new LogTable; $reg->descripcion =  '´'.$table.'´ => '.$e->getMessage();
-                    if ($reg->save()) { $terminar = 0; }else{ echo '´'.$table.'´ => Excepción capturada: ', $e->getMessage(), "\n"; }
                 }
-                
+            }catch (\Exception $e){
+
+                $error = self::errorSOAP($e->getMessage());
+                if ($error == true)
+                {
+                    $reg = new LogTable; $reg->descripcion =  '´'.$table.'´ => '.$e->getMessage();
+                    if ($reg->save())
+                    {
+                        $terminar = 0;
+                    }
+                    else
+                    {
+                        echo '´'.$table.'´ => Excepción capturada: ', $e->getMessage(), "\n";
+                    }
+                }
+
             }
         }while($terminar != 0);
     }
@@ -323,16 +339,26 @@ class Funciones extends Model {
         do{
             try {
                 $client = new \SoapClient($url, $parametro);
-                $result = $client->EjecutarConsultaXML($parametro)->EjecutarConsultaXMLResult->any; $any = simplexml_load_string($result);
-                if (@is_object($any->NewDataSet->Resultado)) { return Funciones::convertirObjetosArraysWS($any->NewDataSet->Resultado,$table); }else{ $terminar = 0; }
-                if (@$any->NewDataSet->Table) {
+                $result = $client->EjecutarConsultaXML($parametro)->EjecutarConsultaXMLResult->any;
+                $any = simplexml_load_string($result);
+                if (@is_object($any->NewDataSet->Resultado))
+                {
+                    return Funciones::convertirObjetosArraysWS($any->NewDataSet->Resultado,$table);
+                }
+                else
+                {
+                    $terminar = 0;
+                }
+
+                if (@$any->NewDataSet->Table)
+                {
                     foreach ($any->NewDataSet->Table as $key => $value) {
                         echo ("\n");
                         echo ("\n Error Linea:\t " . $value->F_NRO_LINEA);
                         echo ("\n Error Value:\t " . $value->F_VALOR);
                         echo ("\n Error Desc:\t " . $value->F_DETALLE);
                     }
-                }  
+                }
             }catch (\Exception $e){
                 $error = self::errorSOAP($e->getMessage());
                 if ($error == true) {
@@ -352,12 +378,26 @@ class Funciones extends Model {
 
     public static function ParametroSentencia($consulta,$conexion,$artisan,$busquedAlterna,$consecutivoDat){
         $criterio = explode(',', $consulta->criterio);
-        if ($artisan == true) { $top = $consulta->top_tabla; }else{ $top = $consulta->top; }
-        if ($busquedAlterna == true) {
+        if ($artisan == true)
+        {
+            $top = $consulta->top_tabla;
+        }
+         else
+        {
+            $top = $consulta->top;
+        }
+
+        if ($busquedAlterna == true)
+        {
             $sentencia = str_replace('@Cia', $conexion->cia, $consulta->sentencia_alterna);
-        }else{ $sentencia = str_replace('@Cia', $conexion->cia, $consulta->sentencia); }
-        
-        if ($consecutivoDat != null) {
+        }
+        else
+        {
+            $sentencia = str_replace('@Cia', $conexion->cia, $consulta->sentencia);
+        }
+
+        if ($consecutivoDat != null)
+        {
             $sentencia = str_replace('@tipoDoc', $consecutivoDat->tipo_documento, $sentencia);
             $sentencia = str_replace('@conseDoc', $consecutivoDat->consecutivo, $sentencia);
             $sentencia = str_replace('@conseItem', $consecutivoDat->consecutivo_b, $sentencia);
@@ -369,7 +409,7 @@ class Funciones extends Model {
         $sentencia = str_replace('@top', $top, $sentencia);
         $sentencia = str_replace('@desdeItems', $consulta->desde_items, $sentencia);
         $sentencia = str_replace('@idPlan', $consulta->id_plan, $sentencia);
-        $sentencia = str_replace('@idCriterio', $criterio[$consulta->criterio_sel], $sentencia);
+        $sentencia = str_replace('@idCriterio', $consulta->criterio, $sentencia);
         $sentencia = str_replace('@idEstadoActivo', 1, $sentencia);
         $sentencia = str_replace('@idEstado', 1, $sentencia);
         $sentencia = str_replace('@idValTercero', 1, $sentencia);
@@ -384,54 +424,54 @@ class Funciones extends Model {
 
     public static function caracterEspecialSimbol($val){
         $char = str_replace(['ñ','Ñ',"'",'?','/','*','¡','¿','[',']','{','}','^','¬','|','°','!','"','$','%','&','(',')','=',',','_','>','<','@'], ['n','N',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '], $val);
-        return $char; 
+        return $char;
     }
 
     public static function condicionPlano($planoFuncion,$valueB,$name_us,$consPlano){
-        
-        $nombreDia = self::nombreDia($valueB); 
-        $diaSemana = self::diaSemana($nombreDia); 
+
+        $nombreDia = self::nombreDia($valueB);
+        $diaSemana = self::diaSemana($nombreDia);
         $diaName = self::diaVisita($nombreDia);
 
-        if($planoFuncion->tipo == 'fecha_a'){ 
+        if($planoFuncion->tipo == 'fecha_a'){
             if ($planoFuncion->tipo_campo == 'texto') {
                 return " ".$consPlano['entre_columna'].str_pad($diaSemana, $planoFuncion->longitud).$consPlano['entre_columna'].$consPlano['separador'];
             }else{ return $diaSemana.$consPlano['separador']; }
-        }elseif($planoFuncion->tipo == 'fecha_b'){             
+        }elseif($planoFuncion->tipo == 'fecha_b'){
             if ($planoFuncion->tipo_campo == 'texto') {
                 return " ".$consPlano['entre_columna'].str_pad($diaName, $planoFuncion->longitud).$consPlano['entre_columna'].$consPlano['separador'];
             }else{ return $diaName.$consPlano['separador']; }
-        }elseif($planoFuncion->tipo == 'fecha_c'){  
-            $fech = str_replace('T', ' ', $valueB); $fech = substr($fech, 0, 19);           
+        }elseif($planoFuncion->tipo == 'fecha_c'){
+            $fech = str_replace('T', ' ', $valueB); $fech = substr($fech, 0, 19);
             if ($planoFuncion->tipo_campo == 'texto') {
                 return " ".$consPlano['entre_columna'].str_pad($fech, $planoFuncion->longitud).$consPlano['entre_columna'].$consPlano['separador'];
             }else{ return $fech.$consPlano['separador']; }
-        }elseif($planoFuncion->tipo == 'agregar_cero'){ 
+        }elseif($planoFuncion->tipo == 'agregar_cero'){
             $valret = "0".$valueB;
             if ($planoFuncion->tipo_campo == 'texto') {
                 return " ".$consPlano['entre_columna'].str_pad($valret, $planoFuncion->longitud).$consPlano['entre_columna'].$consPlano['separador'];
             }else{ return $valret.$consPlano['separador']; }
-        }elseif($planoFuncion->tipo == 'remove'){ 
+        }elseif($planoFuncion->tipo == 'remove'){
             $valret =  str_replace($planoFuncion->nombre, '', $valueB);
             if ($planoFuncion->tipo_campo == 'texto') {
                 return " ".$consPlano['entre_columna'].str_pad($valret, $planoFuncion->longitud).$consPlano['entre_columna'].$consPlano['separador'];
             }else{ return $valret.$consPlano['separador']; }
 
-        }elseif($planoFuncion->tipo == 'ultimos_dos'){ 
+        }elseif($planoFuncion->tipo == 'ultimos_dos'){
             $valremov =  substr($valueB, -2);
             if ($valremov == '00' || $valremov == '0') { $valremov = '01';  }
             if ($planoFuncion->tipo_campo == 'texto') {
                 return " ".$consPlano['entre_columna'].str_pad($valremov, $planoFuncion->longitud).$consPlano['entre_columna'].$consPlano['separador'];
             }else{ return $valremov.$consPlano['separador']; }
 
-        }elseif($planoFuncion->tipo == 'exploy_name_a'){ 
-            
+        }elseif($planoFuncion->tipo == 'exploy_name_a'){
+
             $nameExploy = self::deglosarNombre($valueB,1);
             if ($planoFuncion->tipo_campo == 'texto') {
                 return " ".$consPlano['entre_columna'].str_pad($nameExploy, $planoFuncion->longitud).$consPlano['entre_columna'].$consPlano['separador'];
             }else{ return $nameExploy.$consPlano['separador']; }
 
-        }elseif($planoFuncion->tipo == 'exploy_name_b'){ 
+        }elseif($planoFuncion->tipo == 'exploy_name_b'){
 
             $nameExploy = self::deglosarNombre($valueB,2);
             if ($planoFuncion->tipo_campo == 'texto') {

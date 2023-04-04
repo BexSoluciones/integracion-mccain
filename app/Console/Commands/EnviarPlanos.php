@@ -18,30 +18,29 @@ class EnviarPlanos extends Command
 
     public function handle()
     {
-        $list = Correo::where('estado',1)->get(); 
-        
-        $totalSuc = array('00210');        
-        // $totalSuc = array('00210','00211');        
-        // $totalSuc = array('00210','00211','00212');        
+        $list = Correo::where('estado',1)->get();
 
-        foreach ($list as $data) { 
-            foreach ($totalSuc as $totValue) {
-                $name = "Concesionario ".$totValue; $to = [['email' => $data['correo'], 'name' => $name,]];
-                $email = new Enviar($totValue); Mail::to($to)->send($email); 
-            }
+        //$totalSuc = array('00210');
+        // $totalSuc = array('00210','00211');
+        // $totalSuc = array('00210','00211','00212');
+
+        foreach ($list as $data) {
+                $email = new Enviar();
+                Mail::to($data['correo'])->send($email);
+
         }
 
         // dd("parar");
 
-        $ruta = '/var/www/html/integracion-coltabaco/public/plano';
-    	$ruta_enviado = '/var/www/html/integracion-coltabaco/public/plano_enviado';
+        // $ruta = '/var/www/html/integracion-marsh/public/plano';
+    	// $ruta_enviado = '/var/www/html/integracion-marsh/public/plano_enviado';
 
-        // $ruta = 'public/plano';
-        // $ruta_enviado = 'public/plano_enviado';
-    	
+         $ruta = 'C:\laragon/';
+         $ruta_enviado = 'C:\laragon/plano_enviado';
+
         if (is_dir($ruta)){
 	        $gestor = opendir($ruta);
-	        while (($archivo = readdir($gestor)) !== false)  {	                
+	        while (($archivo = readdir($gestor)) !== false)  {
                 echo "ARCHIVO: ".$archivo." \n";
 	            $ruta_completa = $ruta . "/" . $archivo;
 	            $ruta_completa_nueva = $ruta_enviado . "/" . $archivo;

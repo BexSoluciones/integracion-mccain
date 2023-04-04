@@ -16,28 +16,30 @@ class EjecutarProcesos extends Command
 
     public function handle(){
 
-        echo "=====> [ EJECUTANDO PROCESO COLTABACO ] <=====";
+        echo "=====> [ EJECUTANDO PROCESO MARSH FOOD ] <=====";
 
         $fechaInicio = Funciones::fechaConsulta("inicio");
         $fechaFin = Funciones::fechaConsulta("fin");
 
         // dd($fechaFin);
 
-        $consTabla = new Tabla; $consTabla->getTable(); $consTabla->bind("tbl_consulta"); 
-        
+        $consTabla = new Tabla;
+        $consTabla->getTable();
+        $consTabla->bind("tbl_consulta");
+
         if ($consTabla->where('codigo','>',0)->update(['fechaInicio' => $fechaInicio, 'fechaFin' => $fechaFin])) {
             echo "FECHAS CONSULTAS ACTUALIZADAS: INICIO[".$fechaInicio."] / FIN[".$fechaFin."] \n";
         }
 
-        Artisan::call('integracion:verificar-tipo-documento'); // CONSULTA INVENTARIO EN BODEGAS DE LOS PRODUCTOS DE PEDIDOS APROBADOS 
+        Artisan::call('integracion:verificar-tipo-documento'); // CONSULTA INVENTARIO EN BODEGAS DE LOS PRODUCTOS DE PEDIDOS APROBADOS
 
         Artisan::call('integracion:guardar-informacion'); // VERIFICA INVENTARIO MINIMO EN BODEGAS PARA REMISIONAR, MOVER INVENTARIO
 
         // Artisan::call('integracion:generar-planos'); // VERIFICA INVENTARIO MINIMO EN BODEGAS PARA REMISIONAR, MOVER INVENTARIO
-        
-        // Artisan::call('integracion:enviar-planos'); // VERIFICA INVENTARIO MINIMO EN BODEGAS PARA REMISIONAR, MOVER INVENTARIO
-        
 
-    }  
+        // Artisan::call('integracion:enviar-planos'); // VERIFICA INVENTARIO MINIMO EN BODEGAS PARA REMISIONAR, MOVER INVENTARIO
+
+
+    }
 
 }
