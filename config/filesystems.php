@@ -67,10 +67,10 @@ return [
 
         'ftp' => [
             'driver' => env('FTP_DRIVER','ftp'),
-            'host' => env('FTP_HOST','www.atrespaldo.com'),
-            'username' => env('FTP_USERNAME','pandapan'),
-            'password' => env('FTP_PASSWORD','pruebasPandapan2021$'),
-            // 'port' => env('FTP_PORT',21),
+            'host' => env('FTP_HOST','mars.cdtbigdata.com'),
+            'username' => env('FTP_USERNAME','mars.pandapan'),
+            'password' => env('FTP_PASSWORD','py9BdP'),
+            'port' => env('FTP_PORT',22),
             // 'root' => env('FTP_ROOT',''),
             // 'passive' => env('FTP_PASSIVE',true),
             // 'ssl' => env('FTP_SSL',true),
