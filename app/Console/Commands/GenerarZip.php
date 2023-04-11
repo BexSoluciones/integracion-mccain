@@ -22,8 +22,8 @@ class GenerarZip extends Command
     public function handle(){
 
         $zip = new ZipArchive();
-        $nombreZip = date("Ymd")."_"."D000086";
-        $nombreZipFTP = date("Ymd")."_"."D000086.zip";
+        $nombreZip = date("Ymd")."_"."Marsh";
+        $nombreZipFTP = date("Ymd")."_"."Marsh.zip";
         $ruta = '/var/www/html/integracion-marsh/public/plano/';
         $ruta_enviado = '/var/www/html/integracion-marsh/public/plano_enviado/';
         $nombreArchivoZip = $ruta.$nombreZip.".zip";
