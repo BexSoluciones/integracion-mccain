@@ -85,7 +85,7 @@ return [
             'password' => env('SFTP_PASSWORD','py9BdP'),
             //'privateKey' => env('SFTP_PRIVATE_KEY',''),
             //'password' => env('SFTP_PASSWORD_KEY',''),
-             'port' => env('FTP_PORT',22),
+             'port' => env('SFTP_PORT',22),
              'ignorePassiveAddress' => true,
             // 'root' => env('FTP_ROOT'),
             // 'timeout' => env('FTP_TI'),
