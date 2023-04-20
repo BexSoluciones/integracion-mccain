@@ -67,10 +67,10 @@ return [
 
         'ftp' => [
             'driver' => env('FTP_DRIVER','ftp'),
-            'host' => env('FTP_HOST','mars.cdtbigdata.com'),
-            'username' => env('FTP_USERNAME','mars.pandapan'),
-            'password' => env('FTP_PASSWORD','py9BdP'),
-            'port' => env('FTP_PORT',22),
+            'host' => env('FTP_HOST',''),
+            'username' => env('FTP_USERNAME',''),
+            'password' => env('FTP_PASSWORD',''),
+            'port' => env('FTP_PORT',),
             'ignorePassiveAddress' => true,
             // 'root' => env('FTP_ROOT',''),
             // 'passive' => env('FTP_PASSIVE',true),
@@ -80,12 +80,12 @@ return [
 
         'sftp' => [
             'driver' => env('SFTP_DRIVER','sftp'),
-            'host' => env('SFTP_HOST','mars.cdtbigdata.com'),
-            'username' => env('SFTP_USERNAME','mars.pandapan'),
-            'password' => env('SFTP_PASSWORD','py9BdP'),
+            'host' => env('SFTP_HOST',''),
+            'username' => env('SFTP_USERNAME',''),
+            'password' => env('SFTP_PASSWORD',''),
             //'privateKey' => env('SFTP_PRIVATE_KEY',''),
             //'password' => env('SFTP_PASSWORD_KEY',''),
-             'port' => env('SFTP_PORT',22),
+             'port' => env('SFTP_PORT',),
              'ignorePassiveAddress' => true,
             // 'root' => env('FTP_ROOT'),
             // 'timeout' => env('FTP_TI'),

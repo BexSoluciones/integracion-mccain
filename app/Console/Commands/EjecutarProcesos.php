@@ -16,7 +16,7 @@ class EjecutarProcesos extends Command
 
     public function handle(){
 
-        echo "=====> [ EJECUTANDO PROCESO MARSH FOOD ] <=====";
+        echo "=====> [ EJECUTANDO PROCESO MCCAIN ] <=====";
 
         $fechaInicio = Funciones::fechaConsulta("inicio");
         $fechaFin = Funciones::fechaConsulta("fin");
