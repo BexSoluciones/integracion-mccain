@@ -62,8 +62,8 @@ class GuardarInformacion extends Command
               //CONSTRUCTOR DE XML PARA CONSULTAR POR SOAP
               $xml = Funciones::consultaStructuraXML($dataConexion->conexion, $dataConexion->cia, $dataConexion->proveedor, $dataConexion->usuario, $dataConexion->clave, $sentencia, $dataConexion->consulta, 1, 0);
 
-            //   Log::info([$xml]);
-            //   dd([$xml]);
+             //  Log::info([$xml]);
+             // dd([$xml]);
               //RESULTADO DATOS CONSULTA SOAP
               $datos = Funciones::SOAP_SAVE($dataConexion->url, $xml, $value->tabla_destino);
               $resultado = Funciones::SOAP($dataConexion->url, $xml, $value->tabla_destino);

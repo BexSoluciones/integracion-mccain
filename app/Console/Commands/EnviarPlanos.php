@@ -32,8 +32,8 @@ class EnviarPlanos extends Command
 
         // dd("parar");
 
-         $ruta = '/var/www/html/integracion-marsh/public/plano';
-    	 $ruta_enviado = '/var/www/html/integracion-marsh/public/plano_enviado';
+         $ruta = '/var/www/html/integracion-mccain/public/plano';
+    	 $ruta_enviado = '/var/www/html/integracion-mccain/public/plano_enviado';
 
         // $ruta = 'C:\laragon/';
         // $ruta_enviado = 'C:\laragon/plano_enviado';
